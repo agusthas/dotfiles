@@ -70,7 +70,7 @@ DISABLE_MAGIC_FUNCTIONS="true"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(fzf)
+plugins=(fzf z)
 
 export FZF_DEFAULT_COMMAND='rg --files --hidden -g "!.git/*" -g "!node_modules/*" -g "!.vscode-server/*"'
 
@@ -102,12 +102,10 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-alias vsc="vsc.sh -r"
-alias vscn="vsc.sh -n"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 # fnm
 export PATH=/home/susumantan/.fnm:$PATH
-eval "$(fnm env --use-on-cd)"
+eval "$(fnm env)"
