@@ -1,0 +1,103 @@
+{
+  "editor.bracketPairColorization.enabled": true,
+  "editor.maxTokenizationLineLength": 1000,
+  "editor.scrollbar.verticalScrollbarSize": 11,
+  "editor.fontFamily": "'Iosevka', Consolas, 'Courier New', monospace",
+  "editor.fontSize": 17,
+  "editor.fontLigatures": true,
+  "editor.minimap.enabled": false,
+  "editor.tabSize": 2,
+  "explorer.decorations.badges": false,
+  "workbench.colorTheme": "Tokyo Night",
+  // END EDITOR
+
+  // INTEGRATED TERMINAL
+  "terminal.integrated.fontFamily": "'Iosevka'",
+  "terminal.integrated.fontSize": 16,
+  "terminal.integrated.fontWeightBold": "normal",
+  "terminal.integrated.commandsToSkipShell": [
+    "-workbench.action.terminal.toggleFindCaseSensitive"
+  ],
+  // END INTEGRATED TERMINAL
+
+  // FORMATTER
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+    "source.fixAll.format": true
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": null,
+    "editor.wordWrap": "off"
+  },
+  "[tex]": {
+    "editor.defaultFormatter": null,
+    "editor.wordWrap": "off"
+  },
+  "[sql]": {
+    "editor.formatOnSave": false,
+    "editor.defaultFormatter": null,
+    "editor.wordWrap": "off"
+  },
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  },
+  // END FORMATTER
+
+  // GIT
+  "git.autofetch": true,
+  "gitlens.currentLine.enabled": false,
+  "gitlens.hovers.currentLine.over": "line",
+  // END GIT
+
+  // NEW
+  "security.workspace.trust.untrustedFiles": "open",
+  "workbench.editorAssociations": {
+    "git-rebase-todo": "default"
+  },
+  "workbench.startupEditor": "none",
+  "editor.suggestSelection": "first",
+  "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+  "editor.formatOnSave": true,
+  "editor.cursorBlinking": "phase",
+  "editor.cursorSmoothCaretAnimation": true,
+  "remote.SSH.remotePlatform": {
+    "susumantan": "linux"
+  },
+  // "remote.SSH.defaultExtensions": [
+  //   "bierner.markdown-preview-github-styles",
+  //   "bradlc.vscode-tailwindcss",
+  //   "dbaeumer.vscode-eslint",
+  //   "dbankier.vscode-quick-select",
+  //   "eamodio.gitlens",
+  //   "ecmel.vscode-html-css",
+  //   "esbenp.prettier-vscode",
+  //   "GitHub.vscode-pull-request-github",
+  //   "jock.svg",
+  //   "kaiwood.center-editor-window",
+  //   "ms-azuretools.vscode-docker",
+  //   "ms-vscode.cpptools",
+  //   "naumovs.color-highlight",
+  //   "oderwat.indent-rainbow",
+  //   "Prisma.prisma",
+  //   "ritwickdey.LiveServer",
+  //   "VisualStudioExptTeam.vscodeintellicode",
+  //   "vivaxy.vscode-conventional-commits"
+  // ],
+  "editor.linkedEditing": true,
+  "docker.containers.label": "ContainerName",
+  "workbench.iconTheme": "material-icon-theme",
+  "conventionalCommits.showNewVersionNotes": false,
+  "indentRainbow.includedLanguages": ["html", "css", "scss"],
+  "color-highlight.markerType": "dot-before",
+  "color-highlight.markRuler": false,
+  "color-highlight.languages": [
+    "*",
+    "!css",
+    "!html",
+    "!typescriptreact",
+    "!javascriptreact"
+  ],
+  "tabnine.experimentalAutoImports": true,
+  "docker.truncateLongRegistryPaths": true
+}
