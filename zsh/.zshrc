@@ -38,7 +38,7 @@ DISABLE_MAGIC_FUNCTIONS="true"
 # DISABLE_LS_COLORS="true"
 
 # Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
+DISABLE_AUTO_TITLE="true"
 
 # Uncomment the following line to enable command auto-correction.
 # ENABLE_CORRECTION="true"
@@ -70,9 +70,7 @@ DISABLE_MAGIC_FUNCTIONS="true"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(fzf z)
-
-export FZF_DEFAULT_COMMAND='rg --files --hidden -g "!.git/*" -g "!node_modules/*" -g "!.vscode-server/*"'
+plugins=(npm docker-compose fzf z)
 
 source $ZSH/oh-my-zsh.sh
 
