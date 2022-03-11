@@ -23,7 +23,7 @@ if ! command -v gh &> /dev/null; then
     do_stow git
   fi
 
-  gh auth
+  gh auth login
 
   ssh -T git@github.com
 fi
