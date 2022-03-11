@@ -2,7 +2,7 @@
   "editor.bracketPairColorization.enabled": true,
   "editor.maxTokenizationLineLength": 1000,
   "editor.scrollbar.verticalScrollbarSize": 11,
-  "editor.fontFamily": "'Iosevka', Consolas, 'Courier New', monospace",
+  "editor.fontFamily": "'Iosevka SS14', Consolas, 'Courier New', monospace",
   "editor.fontSize": 17,
   "editor.fontLigatures": true,
   "editor.minimap.enabled": false,
@@ -12,7 +12,7 @@
   // END EDITOR
 
   // INTEGRATED TERMINAL
-  "terminal.integrated.fontFamily": "'Iosevka'",
+  "terminal.integrated.fontFamily": "'Iosevka SS14'",
   "terminal.integrated.fontSize": 16,
   "terminal.integrated.fontWeightBold": "normal",
   "terminal.integrated.commandsToSkipShell": [
@@ -64,26 +64,23 @@
   "remote.SSH.remotePlatform": {
     "susumantan": "linux"
   },
-  // "remote.SSH.defaultExtensions": [
-  //   "bierner.markdown-preview-github-styles",
-  //   "bradlc.vscode-tailwindcss",
-  //   "dbaeumer.vscode-eslint",
-  //   "dbankier.vscode-quick-select",
-  //   "eamodio.gitlens",
-  //   "ecmel.vscode-html-css",
-  //   "esbenp.prettier-vscode",
-  //   "GitHub.vscode-pull-request-github",
-  //   "jock.svg",
-  //   "kaiwood.center-editor-window",
-  //   "ms-azuretools.vscode-docker",
-  //   "ms-vscode.cpptools",
-  //   "naumovs.color-highlight",
-  //   "oderwat.indent-rainbow",
-  //   "Prisma.prisma",
-  //   "ritwickdey.LiveServer",
-  //   "VisualStudioExptTeam.vscodeintellicode",
-  //   "vivaxy.vscode-conventional-commits"
-  // ],
+  "remote.SSH.defaultExtensions": [
+    "eamodio.gitlens",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "VisualStudioExptTeam.vscodeintellicode",
+    "oderwat.indent-rainbow",
+    "naumovs.color-highlight",
+    "bierner.markdown-preview-github-styles",
+    "GitHub.vscode-pull-request-github",
+    "ms-azuretools.vscode-docker"
+    // "Prisma.prisma",
+    // "bradlc.vscode-tailwindcss",
+    // "ecmel.vscode-html-css",
+    // "jock.svg",
+    // "ms-vscode.cpptools",
+    // "vivaxy.vscode-conventional-commits"
+  ],
   "editor.linkedEditing": true,
   "docker.containers.label": "ContainerName",
   "workbench.iconTheme": "material-icon-theme",
@@ -98,6 +95,7 @@
     "!typescriptreact",
     "!javascriptreact"
   ],
-  "tabnine.experimentalAutoImports": true,
-  "docker.truncateLongRegistryPaths": true
+  "docker.truncateLongRegistryPaths": true,
+  "todo-tree.highlights.useColourScheme": true,
+  "todo-tree.general.statusBar": "current file"
 }
