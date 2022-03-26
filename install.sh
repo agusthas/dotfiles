@@ -191,6 +191,9 @@ main() {
   if [[ -f "$HOME/.zshrc" ]]; then
     rm -iv "$HOME/.zshrc"
   fi
+  if [[ -f "$HOME/.zprofile" ]]; then
+    rm -iv "$HOME/.zprofile"
+  fi
   do_stow zsh
 
   install_docker
