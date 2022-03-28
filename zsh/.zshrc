@@ -79,7 +79,7 @@ DISABLE_AUTO_TITLE="true"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(docker-compose gh fnm fzf z)
+plugins=(docker-compose gh fnm fd fzf z)
 
 source $ZSH/oh-my-zsh.sh
 
