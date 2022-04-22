@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -o pipefail
+
 install_ohmyzsh() {
   if [ ! -d $HOME/.oh-my-zsh ]; then
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
@@ -9,27 +11,23 @@ install_ohmyzsh() {
 }
 
 install_powerlevel10k() {
-  if [ ! -d ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k ]; then
-    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
-  else
-    echo "Skip powerlevel-10k"
+  if [ -d ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k ]; then
+    rm -rf ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
   fi
+  git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 }
 
 install_fzf() {
-  if [ ! -d $HOME/.fzf ]; then
-    git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
-  else
-    echo "Skip fzf"
+  if find $HOME -name '\.fzf*'; then
+    rm -rf $HOME/.fzf*
   fi
+  git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+
+  ~/.fzf/install --completion --key-bindings --no-update-rc
 }
 
 install_fnm() {
-  if [ ! -d ~/.fnm ]; then
-    curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell
-  else
-    echo "Skip fnm"
-  fi
+  curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell
 }
 
 install_docker() {
@@ -38,6 +36,87 @@ install_docker() {
   else
     echo "Skip docker"
   fi
+}
+
+install_nnn() {
+  local TARGET_BIN_DIR="$HOME/bin"
+  local D_URL="https://api.github.com/repos/neovim/neovim/releases/latest"
+
+  if find $TARGET_BIN_DIR -name 'nnn*'; then
+    echo "Found nnn in $TARGET_BIN_DIR. Proceed to removing..."
+    rm -v $TARGET_BIN_DIR/nnn*
+  fi
+
+  TEMP_DIR="$(mktemp -d)"
+  pushd $TEMP_DIR > /dev/null
+  echo "Downloading nnn in $PWD"
+
+  if ! curl -s $D_URL | grep -wo 'https.*nnn-static*.*tar.gz' | wget -qi -; then
+    echo "Failed to download nnn"
+  else
+    tar xzf nnn-static-*
+    mv nnn-static nnn
+    mv nnn $TARGET_BIN_DIR
+    chmod +x $TARGET_BIN_DIR/nnn
+    echo "nnn installed in $TARGET_BIN_DIR"
+  fi
+  popd > /dev/null
+
+  echo "Cleaning up $TEMP_DIR"
+  rm -rv $TEMP_DIR
+}
+
+install_nvim() {
+  local TARGET_BIN_DIR="$HOME/bin"
+  local D_URL="https://api.github.com/repos/neovim/neovim/releases/latest"
+
+  if find $TARGET_BIN_DIR -name 'nvim*'; then
+    echo "Found nvim in $TARGET_BIN_DIR. Proceed to removing..."
+    rm -v $TARGET_BIN_DIR/nvim*
+  fi
+
+  TEMP_DIR="$(mktemp -d)"
+  pushd $TEMP_DIR > /dev/null
+  echo "Downloading nvim in $PWD"
+
+  if ! curl -s $D_URL | grep -wo '"https.*nvim\.appimage"' | tr -d '"' | wget -qi -; then
+    echo "Failed to download nvim"
+  else
+    mv nvim* $TARGET_BIN_DIR/nvim
+    chmod +x $TARGET_BIN_DIR/nvim
+    echo "nvim installed in $TARGET_BIN_DIR"
+  fi
+  popd > /dev/null
+
+  echo "Cleaning up $TEMP_DIR"
+  rm -rv $TEMP_DIR
+}
+
+install_7z() {
+  local TARGET_BIN_DIR="$HOME/bin"
+  local D_URL="https://www.7-zip.org/a/7z2107-linux-x64.tar.xz"
+
+  if find $TARGET_BIN_DIR -name '7z*'; then
+    echo "Found 7z in $TARGET_BIN_DIR. Proceed to removing..."
+    rm -v $TARGET_BIN_DIR/7z*
+  fi
+
+  TEMP_DIR="$(mktemp -d)"
+  pushd $TEMP_DIR > /dev/null
+  echo "Downloading 7z in $PWD"
+
+  if ! wget -q $D_URL; then
+    echo "Failed to download 7z"
+  else
+    tar xf 7z2107-linux-x64.tar.xz
+    mv 7zzs $TARGET_BIN_DIR/7z
+    chmod +x $TARGET_BIN_DIR/7z
+    echo "7z installed in $TARGET_BIN_DIR"
+  fi
+  popd > /dev/null
+
+  echo "Cleaning up $TEMP_DIR"
+  rm -rv $TEMP_DIR
 }
 
 install_docker_compose() {
@@ -67,6 +146,9 @@ main() {
   install_fnm
   install_docker
   install_docker_compose
+  install_nnn
+  install_nvim
+  install_7z
 
   echo
   echo "Installing done!"

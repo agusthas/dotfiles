@@ -79,7 +79,7 @@ DISABLE_AUTO_TITLE="true"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(docker-compose gh fnm fd pass fzf z)
+plugins=(git docker-compose gh fnm fd pass fzf z)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -110,12 +110,22 @@ export EDITOR='nvim'
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-alias tt="unzip -tq"
-alias ii="unzip -Z"
 alias pwoff="sudo poweroff"
-alias nnn="nnn-static"
+alias clr='clear; echo Currently logged in on $TTY, as $USERNAME in directory $PWD.'
+alias dls='ls -1'
 
-n() {
+function fzf_alias() {
+  local selection
+  if selection=$(alias | fzf --query="$BUFFER" | sed -re 's/=.+$/ /'); then
+    BUFFER=$selection
+  fi
+  zle redisplay
+}
+
+zle -N fzf_alias
+bindkey -M emacs '\ea' fzf_alias
+
+function n() {
   # Block nesting of nnn in subshells
   if [ -n $NNNLVL ] && [ "${NNNLVL:-0}" -ge 1 ]; then
     echo "nnn is already running"
@@ -145,7 +155,3 @@ n() {
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-# fnm
-# export PATH=/home/susumantan/.fnm:$PATH
-# eval "`fnm env`"

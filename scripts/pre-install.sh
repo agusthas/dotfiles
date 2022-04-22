@@ -5,13 +5,18 @@ echo
 
 sudo apt update && sudo apt upgrade -y
 
-LIST_OF_APPS="zsh zip unzip curl stow"
+LIST_OF_APPS="zsh zip unzip curl wget stow"
 
 sudo apt install $LIST_OF_APPS
 
+# create a bin directory in $HOME if it doesn't exist
+if [ ! -d $HOME/bin ]; then
+  mkdir $HOME/bin
+fi
+
 CURRENT_DEFAULT_SHELL=$(echo $SHELL)
 echo
-echo "Changing default shell to ZSH (need password to do this)"
+echo "Will change default shell to ZSH"
 if grep -q "$CURRENT_DEFAULT_SHELL" <<< "zsh"; then
   chsh -s $(which zsh)
   echo

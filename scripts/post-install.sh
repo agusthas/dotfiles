@@ -80,14 +80,16 @@ setup_p10k() {
 
 setup_fzf() {
   title_printer "fzf"
+  local TARGET_BIN_DIR="$HOME/bin"
 
   if ! command -v fzf &> /dev/null; then
     if ! command -v fdfind &> /dev/null; then
       echo "command fd not found"
 
       if ask "Instaling fd can improve fzf speed when searching files. Would you like me to install it? (need sudo password)" N; then
-        sudo apt install fd-find && echo "Finish installing fd"
-        $HOME/.fzf/install --no-update-rc && echo "Finish setup fzf"
+        sudo apt install fd-find
+        ln -s $(which fdfind) $TARGET_BIN_DIR/fd
+        echo "Finish installing fd"
       else
         echo "You can always install it later. Just follow the guide."
       fi
