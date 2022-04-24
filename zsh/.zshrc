@@ -112,19 +112,21 @@ export EDITOR='nvim'
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias pwoff="sudo poweroff"
 alias clr='clear; echo Currently logged in on $TTY, as $USERNAME in directory $PWD.'
-alias dls='ls -1'
 
 function fzf_alias() {
-  local selection
-  if selection=$(alias | fzf --query="$BUFFER" | sed -re 's/=.+$/ /'); then
-    BUFFER=$selection
-  fi
-  zle redisplay
+  setopt pipefail 2> /dev/null
+  local selected ret
+  selected=( $(alias | fzf --query="$BUFFER" | sed -re 's/=.+$/ /') )
+  LBUFFER="${LBUFFER}${selected} "
+  ret=$?
+  zle reset-prompt
+  return $ret
 }
 
 zle -N fzf_alias
 bindkey -M emacs '\ea' fzf_alias
 
+export NNN_PLUG='b:fzf-bookmarks'
 function n() {
   # Block nesting of nnn in subshells
   if [ -n $NNNLVL ] && [ "${NNNLVL:-0}" -ge 1 ]; then
