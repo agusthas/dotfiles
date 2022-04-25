@@ -12,6 +12,7 @@ if command -v docker >/dev/null 2>&1; then
     docker ps --filter status=running --format "{{.ID}}: {{.Names}}"
     echo
 
+    # TODO: check if container is not a composed files
     # Check if docker compose v2 installed
     if docker compose >/dev/null 2>&1; then
       read -p "Do you want me to shut them down? [y/N] " -n 1 -r
@@ -22,6 +23,4 @@ if command -v docker >/dev/null 2>&1; then
   fi
 fi
 
-echo "Turning off in 3 seconds..."
-sleep 3
-sudo poweroff
+sudo shutdown +1 "Shutting down..."
