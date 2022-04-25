@@ -132,25 +132,6 @@ EOF
   echo "Finish setup docker"
 }
 
-setup_docker_compose() {
-  title_printer "docker-compose"
-
-  if command -v docker-compose &> /dev/null; then
-    echo "docker-compose have been previously set up."
-
-    docker-compose --version
-  else
-    if [ -f /usr/local/bin/docker-compose ]; then
-      sudo chmod +x /usr/local/bin/docker-compose
-      docker-compose --version
-    else
-      echo "Looks like i cannot found /usr/local/bin/docker-compose. If you can run docker-compose and have no problem with it, discard this message."
-    fi
-  fi 
-
-  echo "Finish setup docker-compose"
-}
-
 main() {
   echo "------ POST-INSTALL SCRIPT ------"
   echo
@@ -167,9 +148,6 @@ main() {
   echo
 
   setup_docker
-  echo
-
-  setup_docker_compose
   echo
 }
 

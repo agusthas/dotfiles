@@ -9,14 +9,14 @@ install_ohmyzsh() {
     echo "Skip oh-my-zsh"
   fi
 }
-
+# TODO: Pull instead of recloning
 install_powerlevel10k() {
   if [ -d ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k ]; then
     rm -rf ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
   fi
   git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 }
-
+# TODO: Pull instead of recloning
 install_fzf() {
   if find $HOME -name '\.fzf*'; then
     rm -rf $HOME/.fzf*
@@ -120,13 +120,34 @@ install_7z() {
 }
 
 install_docker_compose() {
-  if ! command -v docker-compose &> /dev/null; then
-    VERSION="1.29.2"
-    TARGET_DIR=/usr/local/bin/docker-compose
-    sudo curl -L "https://github.com/docker/compose/releases/download/$VERSION/docker-compose-$(uname -s)-$(uname -m)" -o $TARGET_DIR
-  else
-    echo "Skip docker-compose"
+  DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+  local TARGET_BIN_DIR="$DOCKER_CONFIG/cli-plugins"
+  if [ ! -d $TARGET_BIN_DIR ]; then
+    mkdir -p $TARGET_BIN_DIR
   fi
+
+  local D_URL="https://api.github.com/repos/docker/compose/releases/latest"
+
+  if find $TARGET_BIN_DIR -name 'docker-compose*'; then
+    echo "Found compose in $TARGET_BIN_DIR. Proceed to removing..."
+    rm -v $TARGET_BIN_DIR/docker-compose*
+  fi
+
+  TEMP_DIR="$(mktemp -d)"
+  pushd $TEMP_DIR > /dev/null
+  echo "Downloading compose in $PWD"
+
+  if ! curl -s $D_URL | grep -wo '"https.*linux-x86_64"' | tr -d '"' | wget -qi -; then
+    echo "Failed to download compose"
+  else
+    mv docker-compose* $TARGET_BIN_DIR/docker-compose
+    chmod +x $TARGET_BIN_DIR/docker-compose
+    echo "compose installed in $TARGET_BIN_DIR"
+  fi
+  popd > /dev/null
+
+  echo "Cleaning up $TEMP_DIR"
+  rm -rv $TEMP_DIR
 }
 
 main() {
