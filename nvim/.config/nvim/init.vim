@@ -1,83 +1,111 @@
-" Don't try to be vi compatible
-set nocompatible
+" Search recursively downward from CWD; provides TAB completion for filenames
+" e.g., `:find vim* <TAB>`
+set path+=**
 
-" Helps force plugins to load correctly when it is turned back on below
-filetype off
-
-" Turn on syntax highlighting
-syntax on
-
-" For plugins to load correctly
-filetype plugin indent on
-
-nnoremap <SPACE> <Nop>
-let mapleader = " "
-
-" Security
+" number of lines at the beginning and end of files checked for file-specific vars
 set modelines=0
 
-" Show line numbers
-set number
+" reload files changed outside of Vim not currently modified in Vim (needs below)
+set autoread
 
-" Show file stats
-set ruler
+" http://stackoverflow.com/questions/2490227/how-does-vims-autoread-work#20418591
+au FocusGained,BufEnter * :silent! !
 
-" Blink cursor on error instead of beeping (grr)
-set visualbell
-
-" Encoding
+" use Unicode
 set encoding=utf-8
 
-" Whitespace
-set formatoptions=tcqrn1
-set tabstop=2
-set shiftwidth=2
-set softtabstop=2
-set expandtab
-set noshiftround
+" errors flash screen rather than emit beep
+set visualbell
 
-" Cursor motion
-set scrolloff=5
+" make Backspace work like Delete
 set backspace=indent,eol,start
-set matchpairs+=<:> " use % to jump between pairs
-runtime! macros/matchit.vim
 
-" Move up/down editor lines
-nnoremap j gj
-nnoremap k gk
+" don't create `filename~` backups
+set nobackup
 
-" Allow hidden buffers
+" don't create temp files
+set noswapfile
+
+" line numbers and distances
+set number 
+
+" number of lines offset when jumping
+set scrolloff=2
+
+" Tab key enters 2 spaces
+" To enter a TAB character when `expandtab` is in effect,
+" CTRL-v-TAB
+set expandtab tabstop=2 shiftwidth=2 softtabstop=2 
+
+" Indent new line the same as the preceding line
+set autoindent
+
+" statusline indicates insert or normal mode
+set showmode showcmd
+
+" make scrolling and painting fast
+" ttyfast kept for vim compatibility but not needed for nvim
+set ttyfast lazyredraw
+
+" highlight matching parens, braces, brackets, etc
+set showmatch
+
+" http://vim.wikia.com/wiki/Searching
+set hlsearch incsearch ignorecase smartcase
+
+" As opposed to `wrap`
+"set nowrap
+
+" http://vim.wikia.com/wiki/Set_working_directory_to_the_current_file
+set autochdir
+
+" open new buffers without saving current modifications (buffer remains open)
 set hidden
 
-" Rendering
-set ttyfast
+" http://stackoverflow.com/questions/9511253/how-to-effectively-use-vim-wildmenu
+set wildmenu wildmode=list:longest,full
 
-" Status bar
-set laststatus=2
+" StatusLine always visible, display full path
+" http://learnvimscriptthehardway.stevelosh.com/chapters/17.html
+set laststatus=2 statusline=%F
 
-" Last line
-set showmode
-set showcmd
+" Use system clipboard
+" http://vim.wikia.com/wiki/Accessing_the_system_clipboard
+" for linux
+"set clipboard=unnamedplus
+" for macOS
+set clipboard=unnamed
 
-" Searching
-nnoremap / /\v
-vnoremap / /\v
-set hlsearch
-set incsearch
-set ignorecase
-set smartcase
-set showmatch
-map <leader><space> :let @/=''<cr> " clear search
+" Folding
+" https://vim.fandom.com/wiki/Folding
+" https://vim.fandom.com/wiki/All_folds_open_when_opening_a_file
+" https://stackoverflow.com/questions/8316139/how-to-set-the-default-to-unfolded-when-you-open-a-file
+set foldmethod=indent
+set foldnestmax=1
+set foldlevelstart=1
 
-" Formatting
-map <leader>q gqip
+" Plugins, syntax, and colors
+" ---------------------------------------------------------------------------
+" vim-plug
+" https://github.com/junegunn/vim-plug
+" Specify a directory for plugins
+" - For Neovim: ~/.local/share/nvim/plugged
+" - Avoid using standard Vim directory names like 'plugin'
+call plug#begin('~/.local/share/nvim/plugged')
 
-" Visualize tabs and newlines
-set listchars=tab:▸\ ,eol:¬
-" Uncomment this to enable by default:
-" set list " To enable by default
-" Or use your leader key + l to toggle on/off
-map <leader>l :set list!<CR> " Toggle tabs and EOL
+" Make sure to use single quotes
+" Install with `:PlugInstall`
+
+" https://github.com/tpope/vim-commentary
+Plug 'tpope/vim-commentary'
+
+" https://github.com/tpope/vim-surround
+Plug 'tpope/vim-surround'
+
+" Initialize plugin system
+call plug#end()
+
+syntax enable
 
 " Colorscheme
 let g:solarized_termcolors=256
