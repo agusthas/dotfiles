@@ -43,7 +43,7 @@ install_docker() {
 
 install_nnn() {
   local TARGET_BIN_DIR="$HOME/bin"
-  local D_URL="https://api.github.com/repos/neovim/neovim/releases/latest"
+  local D_URL="https://api.github.com/repos/jarun/nnn/releases/latest"
 
   if find $TARGET_BIN_DIR -name 'nnn*'; then
     echo "Found nnn in $TARGET_BIN_DIR. Proceed to removing..."
