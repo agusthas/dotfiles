@@ -110,7 +110,6 @@ export EDITOR='nvim'
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-alias pwoff="sudo poweroff"
 alias clr='clear; echo Currently logged in on $TTY, as $USERNAME in directory $PWD.'
 
 function fzf_alias() {
