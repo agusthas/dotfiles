@@ -88,6 +88,36 @@ install_fzf() {
   prn_footer
 }
 
+install_bat() {
+  prn_header "install bat"
+  local TARGET_BIN_DIR="$HOME/bin"
+  local D_URL="https://api.github.com/repos/sharkdp/bat/releases/latest"
+
+  if compgen -G "$TARGET_BIN_DIR/bat*" > /dev/null; then
+    shw_info "Found binary in $TARGET_BIN_DIR. Proceed to removing..."
+    rm $TARGET_BIN_DIR/bat*
+  fi
+  echo
+
+  TEMP_DIR="$(mktemp -d)"
+  pushd $TEMP_DIR > /dev/null
+
+  shw_norm "Download and install"
+  if ! curl -s $D_URL | grep -wo 'https.*x86_64.*-linux-gnu.tar.gz' | wget -qi -; then
+    shw_err "Failed to download"
+  else
+    local extracted=$(tar -tzf bat-* | head -n 1 | cut -f 1 -d '/')
+    tar xzf bat-*
+    mv "$extracted/bat" "$TARGET_BIN_DIR/bat"
+    chmod +x "$TARGET_BIN_DIR/bat"
+    shw_info "Installed in $TARGET_BIN_DIR"
+  fi
+  popd > /dev/null
+
+  rm -r $TEMP_DIR
+  prn_footer
+}
+
 install_fd() {
   prn_header "install fd"
   local TARGET_BIN_DIR="$HOME/bin"
@@ -295,6 +325,7 @@ main() {
   install_ohmyzsh
   install_powerlevel10k
   install_fzf
+  install_bat
   install_fd
   install_fnm
   install_docker
