@@ -9,19 +9,22 @@ install_ohmyzsh() {
     echo "Skip oh-my-zsh"
   fi
 }
-# TODO: Pull instead of recloning
+
 install_powerlevel10k() {
-  if [ -d ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k ]; then
-    rm -rf ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+  if [ ! -d ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k ]; then
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+  else
+    git -C ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k pull
   fi
-  git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 }
-# TODO: Pull instead of recloning
+
 install_fzf() {
-  if find $HOME -name '\.fzf*'; then
-    rm -rf $HOME/.fzf*
+  TARGET_DIR="$HOME/.fzf"
+  if [ ! -d $HOME/.fzf ]; then
+    git clone --depth 1 https://github.com/junegunn/fzf.git "$TARGET_DIR"
+  else
+    git -C "$TARGET_DIR" pull
   fi
-  git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 
   ~/.fzf/install --completion --key-bindings --no-update-rc
 }
@@ -161,15 +164,15 @@ main() {
     esac 
   done
 
-  install_ohmyzsh
+  # install_ohmyzsh
   install_powerlevel10k
   install_fzf
-  install_fnm
-  install_docker
-  install_docker_compose
-  install_nnn
-  install_nvim
-  install_7z
+  # install_fnm
+  # install_docker
+  # install_docker_compose
+  # install_nnn
+  # install_nvim
+  # install_7z
 
   echo
   echo "Installing done!"
