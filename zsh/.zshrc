@@ -110,7 +110,9 @@ export EDITOR='nvim'
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-alias clr='clear; echo Currently logged in on $TTY, as $USERNAME in directory $PWD.'
+alias :q="exit"
+alias :c='clear; echo Currently logged in on $TTY, as $USERNAME in directory $PWD.'
+alias :C='clear; echo Currently logged in on $TTY, as $USERNAME in directory $PWD.'
 
 function fzf_alias() {
   setopt pipefail 2> /dev/null
