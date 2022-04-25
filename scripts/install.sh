@@ -31,6 +31,10 @@ prn_header() {
 prn_footer() {
   echo "---------------------"
 }
+
+please_stow() {
+  stow -d "$HOME/dotfiles" -t ~ "$1"
+}
 # END UTILITY
 
 install_ohmyzsh() {
@@ -40,6 +44,13 @@ install_ohmyzsh() {
   else
     shw_warn "oh-my-zsh is already installed"
   fi
+
+  shw_norm "Execute post install"
+  rm -f "$HOME/.zshrc" # remove zshrc
+  rm -f "$HOME/.zprofile" # remove zprofile
+  rm -f "$HOME/.zshenv" # remove zshenv
+  please_stow zsh
+
   prn_footer
 }
 
@@ -53,6 +64,11 @@ install_powerlevel10k() {
     shw_norm "Updating powerlevel10k" 
     git -C ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k pull
   fi
+
+  shw_norm "Execute post install"
+  rm -f "$HOME/.p10k.zsh" # remove p10k
+  please_stow p10k
+
   prn_footer
 }
 
@@ -67,8 +83,38 @@ install_fzf() {
     shw_norm "Updating fzf" 
     git -C "$TARGET_DIR" pull
   fi
-
   ~/.fzf/install --completion --key-bindings --no-update-rc > /dev/null 2>&1
+
+  prn_footer
+}
+
+install_fd() {
+  prn_header "install fd"
+  local TARGET_BIN_DIR="$HOME/bin"
+  local D_URL="https://api.github.com/repos/sharkdp/fd/releases/latest"
+
+  if compgen -G "$TARGET_BIN_DIR/fd*" > /dev/null; then
+    shw_info "Found binary in $TARGET_BIN_DIR. Proceed to removing..."
+    rm $TARGET_BIN_DIR/fd*
+  fi
+  echo
+
+  TEMP_DIR="$(mktemp -d)"
+  pushd $TEMP_DIR > /dev/null
+
+  shw_norm "Download and install"
+  if ! curl -s $D_URL | grep -wo 'https.*x86_64.*-linux-gnu.tar.gz' | wget -qi -; then
+    shw_err "Failed to download"
+  else
+    local extracted=$(tar -tzf fd-* | head -n 1 | cut -f 1 -d '/')
+    tar xzf fd-*
+    mv "$extracted/fd" "$TARGET_BIN_DIR/fd"
+    chmod +x "$TARGET_BIN_DIR/fd"
+    shw_info "Installed in $TARGET_BIN_DIR"
+  fi
+  popd > /dev/null
+
+  rm -r $TEMP_DIR
   prn_footer
 }
 
@@ -85,6 +131,29 @@ install_docker() {
   else
     shw_warn "docker is already installed"
   fi
+
+  shw_norm "Execute post install"
+  cat << EOF
+This post install for docker will:
+
+1. Create docker group and add current user to the docker group (eliminating the need to sudo on docker command).
+2. Configure log driver in /etc/docker/daemon.json to use local and a max size of 10m and max file of 3 (reducing the bloated log file of docker).
+
+Some of this command is requires sudo and also requires you to not have ever configured docker except from installing.
+If you already configured the docker to your likings, please answer no to the question below
+EOF
+
+  read -p "Do you want to proceed? [y/N] " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    shw_white "adding current user ($USER) to docker group (eliminating the need to sudo on docker command)"
+    sudo groupadd docker
+    sudo usermod -aG docker $USER
+
+    shw_white "configuring log driver in /etc/docker/daemon.json to use local and a max size of 10m and max file of 3 (reducing the bloated log file of docker)"
+    echo "{ \"log-driver\": \"local\", \"log-opts\": { \"max-size\": \"10m\", \"max-file\": \"3\" } }" | sudo tee /etc/docker/daemon.json
+  fi
+
   prn_footer
 }
 
@@ -226,6 +295,7 @@ main() {
   install_ohmyzsh
   install_powerlevel10k
   install_fzf
+  install_fd
   install_fnm
   install_docker
   install_docker_compose
