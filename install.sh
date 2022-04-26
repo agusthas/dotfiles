@@ -42,11 +42,6 @@ has() {
   command -v "$1" 1>/dev/null 2>&1
 }
 
-get_tmpfile() {
-  suffix="$1"
-  printf "%s.%s" "$(mktemp)" "${suffix}"
-}
-
 get_tmpdir() {
   dir_name=$(mktemp -d)
   printf "%s" "${dir_name}"
@@ -107,25 +102,6 @@ config_stow() {
 force_pull() {
   git -C "$1" pull --rebase --force > /dev/null 2>&1
 }
-
-confirm() {
-  if [ -z "${FORCE-}" ]; then
-    printf "%s " "${MAGENTA}?${NO_COLOR} $* ${BOLD}[y/N]${NO_COLOR}"
-    set +e
-    read -r yn </dev/tty
-    rc=$?
-    set -e
-    if [ $rc -ne 0 ]; then
-      error "Error reading from prompt (please re-run with the '--yes' option)"
-      exit 1
-    fi
-    if [ "$yn" != "y" ] && [ "$yn" != "yes" ]; then
-      error 'Aborting (please answer "yes" to continue)'
-      exit 1
-    fi
-  fi
-}
-
 
 detect_platform() {
   platform="$(uname -s | tr '[:upper:]' '[:lower:]')"
@@ -501,51 +477,6 @@ install_base_packages() {
 }
 #endregion
 
-cat << EOF
-${BOLD}${UNDERLINE}Installer Script${NO_COLOR}
-
-${BOLD}>${NO_COLOR} Configuration:
-  ${BOLD}Platform${NO_COLOR}: ${GREEN}${PLATFORM}${NO_COLOR}
-  ${BOLD}Architecture${NO_COLOR}: ${GREEN}${ARCH}${NO_COLOR}
-  ${BOLD}Bin Directory${NO_COLOR}: ${GREEN}${BIN_DIR}${NO_COLOR}
-
-${BOLD}>${NO_COLOR} Packages:
-  ${YELLOW}(sudo required)${NO_COLOR}
-  - ${BOLD}zsh${NO_COLOR}
-  - ${BOLD}zip${NO_COLOR}
-  - ${BOLD}unzip${NO_COLOR}
-  - ${BOLD}curl${NO_COLOR}
-  - ${BOLD}wget${NO_COLOR}
-  - ${BOLD}stow${NO_COLOR}
-  - ${BOLD}jq${NO_COLOR}
-
-  ${YELLOW}(sudo not required)${NO_COLOR}
-  - ${BOLD}oh-my-zsh${NO_COLOR}
-  - ${BOLD}p10k${NO_COLOR}
-  - ${BOLD}fzf${NO_COLOR}
-  - ${BOLD}bat${NO_COLOR}
-  - ${BOLD}fd${NO_COLOR}
-  - ${BOLD}fnm${NO_COLOR}
-  - ${BOLD}docker${NO_COLOR}
-  - ${BOLD}docker-compose v2${NO_COLOR}
-  - ${BOLD}nnn${NO_COLOR}
-  - ${BOLD}nvim${NO_COLOR}
-  - ${BOLD}7z${NO_COLOR}
-
-${BOLD}>${NO_COLOR} Notes:
-Please be aware that this script will ${BOLD}MODIFY${NO_COLOR} your dotfiles such as ${BOLD}~/.zshrc${NO_COLOR} and ${BOLD}~/.p10k.zsh${NO_COLOR}.
-This script assumes:
-  1. your dotfiles are in ${BOLD}~/.dotfiles${NO_COLOR} and that you have already cloned the repository.
-  2. your system is ${BOLD}${PLATFORM}${NO_COLOR} and ${BOLD}${ARCH}${NO_COLOR}.
-  3. your system are freshly installed and that you have not modified your dotfiles.
-
-Support for other platforms and architectures is currently ${BOLD}${UNDERLINE}not${NO_COLOR}${BOLD} supported${NO_COLOR}.
-
-
-EOF
-
-confirm "Do you want to keep installing (Make sure you know what you are doing)?"
-
 install_base_packages
 install_ohmyzsh
 install_powerlevel10k
@@ -560,4 +491,4 @@ install_nvim
 install_7z
 
 printf '\n'
-completed "All done. Any issues or suggestions are welcome in the ${BOLD}${UNDERLINE}issues${NO_COLOR}${BOLD} section of the repository."
+completed "All done."
