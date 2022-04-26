@@ -474,8 +474,9 @@ install_base_packages() {
     exit 1
   fi
   info "sudo apt-get update"
-  printf "\n"
   sudo apt-get update 2>&1 > /dev/null
+  info "sudo apt-get upgrade"
+  sudo apt-get upgrade -y 2>&1 > /dev/null
 
   for i in "${packages[@]}"; do
     if ! has $i; then
