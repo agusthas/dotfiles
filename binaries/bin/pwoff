@@ -4,23 +4,19 @@
 # -----------
 # Wrapper around poweroff.
 
-# Check if docker installed
-if command -v docker >/dev/null 2>&1; then
-  # Check if there are any containers running
-  if [ "$(docker ps -q)" ]; then
-    echo "There are still running containers. Please stop them before shutting down."
-    docker ps --filter status=running --format "{{.ID}}: {{.Names}}"
-    echo
-
-    # TODO: check if container is not a composed files
-    # Check if docker compose v2 installed
-    if docker compose >/dev/null 2>&1; then
-      read -p "Do you want me to shut them down? [y/N] " -n 1 -r
-      echo
-
-      [[ $REPLY =~ ^[Yy]$ ]] && for composed in $(docker compose ls -q); do docker compose -p "$composed" down; done || exit 1
-    fi
-  fi
+# Check if docker installed and there are still running container
+if [ command -v docker >/dev/null 2>&1 ] && [ "$(docker ps -q)" ]; then
+  echo "There are still running containers."
+  docker ps --filter status=running --format "{{.ID}}: {{.Names}}"
+  echo
 fi
 
-sudo shutdown +1 "Shutting down..."
+read -p "Do you want to shut down? [y/N] " -n 1 -r
+echo
+
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+  sudo shutdown +1 "Gracefully shutting down..."
+else
+  echo "Aborting..."
+  exit 0
+fi
