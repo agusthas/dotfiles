@@ -111,8 +111,52 @@ export EDITOR='nvim'
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias :q="exit"
-alias :c='clear; echo Currently logged in on $TTY, as $USERNAME in directory $PWD.'
-alias :C='clear; echo Currently logged in on $TTY, as $USERNAME in directory $PWD.'
+alias clr='clear; echo Currently logged in on $TTY, as $USERNAME in directory $PWD.'
+
+function fns() {
+  local scripts script_name
+  local package_manager
+
+  while getopts 'hp:' OPTION; do
+    case "$OPTION" in
+      p)
+        package_manager="$OPTARG"
+        ;;
+      h)
+        echo "usage: $(basename "$0") [-h] [-p package_manager]"
+        return 0
+        ;;
+      ?)
+        echo "usage: $(basename "$0") [-l] [-p package_manager]" >&2
+        return 1
+        ;;
+    esac
+  done
+
+  # Get script name
+  if cat package.json > /dev/null 2>&1; then
+    scripts=$(cat package.json | jq -r '.scripts | to_entries[] | "\"\(.key)\": \"\(.value)\""' | fzf --reverse --height=40%)
+
+    if [[ -n $scripts ]]; then
+      script_name=$(echo $scripts | awk -F ': ' '{gsub(/"/, "", $1); print $1}')
+    else
+      echo "fns: Exit: Please select any script"
+      return 1
+    fi
+  else
+    echo "fns: Error: No package.json in current directory"
+    return 1
+  fi
+
+  case "$package_manager" in
+    yarn)
+      yarn $script_name
+      ;;
+    *)
+      npm run $script_name
+      ;;
+  esac
+}
 
 function fzf_alias() {
   setopt pipefail 2> /dev/null
@@ -124,10 +168,33 @@ function fzf_alias() {
   return $ret
 }
 
+# Toggle comments
+function toggle_comment() {
+  if [[ "$BUFFER" =~ "(^#\s+|^\s+#)" ]]; then
+    BUFFER=$(sed -E 's/(^#\s+|^\s+#)//' <<< "$BUFFER")
+  else
+    BUFFER="# $BUFFER"
+  fi
+  zle reset-prompt
+}
+
 zle -N fzf_alias
 bindkey -M emacs '\ea' fzf_alias
+zle -N toggle_comment
+bindkey -M emacs '^[/' toggle_comment
 
-export NNN_PLUG='b:fzf-bookmarks'
+# Remove commented command from history
+function zshaddhistory() {
+  emulate -L zsh
+  if ! [[ "$1" =~ "(^#\s+|^\s+#|^ |^clear)" ]] ; then
+    print -sr -- "${1%%$'\n'}"
+    fc -p
+  else
+    return 1
+  fi
+}
+
+export NNN_PLUG='b:fzf-bookmarks;p:preview'
 function n() {
   # Block nesting of nnn in subshells
   if [ -n $NNNLVL ] && [ "${NNNLVL:-0}" -ge 1 ]; then
@@ -143,12 +210,12 @@ function n() {
   NNN_TMPFILE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.lastd"
 
   # Unmask ^Q (, ^V etc.) (if required, see `stty -a`) to Quit nnn
-  # stty start undef
-  # stty stop undef
+  stty start undef
+  stty stop undef
   # stty lwrap undef
   # stty lnext undef
 
-  nnn "$@"
+  nnn -Q "$@"
 
   if [ -f "$NNN_TMPFILE" ]; then
     . "$NNN_TMPFILE"
