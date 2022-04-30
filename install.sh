@@ -11,7 +11,6 @@ RED="$(tput setaf 1 2>/dev/null || printf '')"
 GREEN="$(tput setaf 2 2>/dev/null || printf '')"
 YELLOW="$(tput setaf 3 2>/dev/null || printf '')"
 BLUE="$(tput setaf 4 2>/dev/null || printf '')"
-MAGENTA="$(tput setaf 5 2>/dev/null || printf '')"
 NO_COLOR="$(tput sgr0 2>/dev/null || printf '')"
 
 info() {
@@ -51,7 +50,7 @@ download() {
   file="$1"
   url="$2"
 
-  wget -q -O $file $url
+  wget -q -O "$file" "$url"
   rc=$?
   
   if [ $rc -ne 0 ]; then
@@ -159,7 +158,7 @@ detect_bin_dir() {
   )
 
   if [ "${good}" != "1" ]; then
-    warn "Bin directory ${bin_dir} is not in your \$PATH"
+    warn "Bin directory ${bin_dir} is not in your PATH"
   fi
 
   printf "%s" "${bin_dir}"
@@ -175,8 +174,13 @@ install_ohmyzsh() {
   target_dir="$HOME/.oh-my-zsh"
 
   info "Oh My Zsh"
-  if [ ! "$target_dir" ] && [ ! has omz ]; then
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended && completed "Oh My Zsh installed" || warn "Oh My Zsh installation failed"
+  if [ ! "$target_dir" ] && ! has omz; then
+    if sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended; then
+      completed_tabbed "Oh My Zsh installed"
+    else
+      error "Oh My Zsh installation failed"
+      return 1
+    fi
   else
     completed_tabbed "Oh My Zsh is already installed"
   fi
@@ -195,10 +199,10 @@ install_powerlevel10k() {
   target_dir="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
 
   info "Powerlevel10k [${BLUE}${UNDERLINE}$url${NO_COLOR}]"
-  if [ ! -d "$target_dir" ] && [ ! has p10k ]; then
+  if [ ! -d "$target_dir" ] && ! has p10k; then
     git clone --depth=1 "$url" "$target_dir"
   else
-    force_pull $target_dir && completed_tabbed "Pulled latest changes"
+    force_pull "$target_dir" && completed_tabbed "Pulled latest changes"
   fi
 
   rm -f "$HOME/.p10k.zsh" # remove p10k
@@ -213,10 +217,10 @@ install_fzf() {
   target_dir="$HOME/.fzf"
 
   info "FZF [${BLUE}${UNDERLINE}$url${NO_COLOR}]"
-  if [ ! -d $HOME/.fzf ] && [ ! has fzf ]; then
+  if [ ! -d "$target_dir" ] && ! has fzf; then
     git clone --depth 1 "$url" "$target_dir" && completed_tabbed "Cloned fzf"
   else
-    force_pull $target_dir && completed_tabbed "Pulled latest changes"
+    force_pull "$target_dir" && completed_tabbed "Pulled latest changes"
   fi
   ~/.fzf/install --completion --key-bindings --no-update-rc > /dev/null 2>&1
   
@@ -229,30 +233,31 @@ install_bat() {
   ext=".tar.gz"
   grep_pattern="https.*bat.*${ARCH}.*${PLATFORM}.*musl${ext}"
   url=$(curl -s $base_url | jq -r '.assets[].browser_download_url' | grep "${grep_pattern}")
-  archive=$(basename $url)
+  archive=$(basename "$url")
 
   info "Bat [${BLUE}${UNDERLINE}$url${NO_COLOR}]"
 
   tmp_dir=$(get_tmpdir)
-  pushd $tmp_dir > /dev/null
+  pushd "$tmp_dir" > /dev/null || return 1
 
   download "$archive" "$url" || return 1
 
   unpack "$archive" || return 1
 
-  extracted=$(ls -1 | grep -v "^$archive$")
+  extracted=$(find . -mindepth 1 -maxdepth 1 -type d)
   if [ ! -d "$extracted" ]; then
     error "Extracted archive not found"
     return 1
   fi
 
-  mv -f "$extracted/bat" "$BIN_DIR/bat" \
-    && chmod +x "$BIN_DIR/bat" \
-    && completed_tabbed "Installed bat" \
-    || error "Failed to install bat"
+  if mv -f "$extracted/bat" "$BIN_DIR/bat" && chmod +x "$BIN_DIR/bat"; then
+    completed_tabbed "Bat installed"
+  else
+    error "Bat installation failed"
+  fi
 
-  popd > /dev/null
-  rm -r $tmp_dir
+  popd > /dev/null || return 1
+  rm -r "$tmp_dir"
 
   printf "\n"
 }
@@ -262,32 +267,33 @@ install_fd() {
   ext=".tar.gz"
   grep_pattern="https.*fd.*${ARCH}.*${PLATFORM}.*musl${ext}"
   url=$(curl -s $base_url | jq -r '.assets[].browser_download_url' | grep "${grep_pattern}")
-  archive=$(basename $url)
+  archive=$(basename "$url")
 
   local TARGET_BIN_DIR="$HOME/bin"
 
   info "fd [${BLUE}${UNDERLINE}$url${NO_COLOR}]"
 
   tmp_dir="$(get_tmpdir)"
-  pushd $tmp_dir > /dev/null
+  pushd "$tmp_dir" > /dev/null || return 1
 
   download "$archive" "$url" || return 1
 
   unpack "$archive" || return 1
 
-  extracted=$(ls -1 | grep -v "^$archive$")
+  extracted=$(find . -mindepth 1 -maxdepth 1 -type d)
   if [ ! -d "$extracted" ]; then
     error "Extracted archive not found"
     return 1
   fi
 
-  mv -f "$extracted/fd" "$TARGET_BIN_DIR/fd" \
-    && chmod +x "$TARGET_BIN_DIR/fd" \
-    && completed_tabbed "Installed" \
-    || error "Failed to install fd"
+  if mv -f "$extracted/fd" "$TARGET_BIN_DIR/fd" && chmod +x "$TARGET_BIN_DIR/fd"; then
+    completed_tabbed "fd installed"
+  else
+    error "fd installation failed"
+  fi
 
-  popd > /dev/null
-  rm -r $tmp_dir
+  popd > /dev/null || return 1
+  rm -r "$tmp_dir"
 
   printf "\n"
 }
@@ -323,7 +329,7 @@ EOF
     if [[ $REPLY =~ ^[Yy]$ ]]; then
       echo "adding current user ($USER) to docker group (eliminating the need to sudo on docker command)"
       sudo groupadd docker
-      sudo usermod -aG docker $USER
+      sudo usermod -aG docker "$USER"
 
       echo "configuring log driver in /etc/docker/daemon.json to use local and a max size of 10m and max file of 3 (reducing the bloated log file of docker)"
       echo "{ \"log-driver\": \"local\", \"log-opts\": { \"max-size\": \"10m\", \"max-file\": \"3\" } }" | sudo tee /etc/docker/daemon.json
@@ -340,29 +346,27 @@ install_nnn() {
   ext=".tar.gz"
   grep_pattern="https.*nnn-static.*${ext}"
   url=$(curl -s https://api.github.com/repos/jarun/nnn/releases/latest | jq -r '.assets[].browser_download_url' | grep "${grep_pattern}")
-  archive=$(basename $url)
+  archive=$(basename "$url")
 
   info "nnn [${BLUE}${UNDERLINE}$url${NO_COLOR}]"
 
   tmp_dir="$(mktemp -d)"
-  pushd $tmp_dir > /dev/null
+  pushd "$tmp_dir" > /dev/null || return 1
 
   download "$archive" "$url" || return 1
 
   unpack "$archive" || return 1
-  extracted=$(ls -1 | grep -v "^$archive$")
-  if [ ! -f "$extracted" ]; then
-    error "Extracted archive not found"
-    return 1
+
+  extracted=$(find . -mindepth 1 -maxdepth 1 -type f -not -name "*.tar.gz")
+
+  if mv -f "$extracted" "$BIN_DIR/nnn" && chmod +x "$BIN_DIR/nnn"; then
+    completed_tabbed "nnn installed"
+  else
+    error "nnn installation failed"
   fi
 
-  mv -f $extracted "$BIN_DIR/nnn" \
-    && chmod +x "$BIN_DIR/nnn" \
-    && completed_tabbed "Installed" \
-    || error "Failed to install nnn"
-
-  popd > /dev/null
-  rm -r $tmp_dir
+  popd > /dev/null || return 1
+  rm -r "$tmp_dir"
   
   printf "\n"
 }
@@ -372,45 +376,82 @@ install_nvim() {
   ext=".appimage"
   grep_pattern="https.*nvim*${ext}$"
   url=$(curl -s $base_url | jq -r '.assets[].browser_download_url' | grep "${grep_pattern}")
-  archive=$(basename $url)
+  archive=$(basename "$url")
 
   info "nvim [${BLUE}${UNDERLINE}$url${NO_COLOR}]"
 
   tmp_dir="$(mktemp -d)"
-  pushd $tmp_dir > /dev/null
+  pushd "$tmp_dir" > /dev/null || return 1
 
   # download to the temp file
   download "$archive" "$url" || return 1
 
   # move and rename nvim.appimage to BIN_DIR
-  mv -f nvim* "$BIN_DIR/nvim" && chmod +x "$BIN_DIR/nvim" && completed_tabbed "Installed" || error "Failed to install nvim"
+  if mv -f nvim* "$BIN_DIR/nvim" && chmod +x "$BIN_DIR/nvim"; then
+    completed_tabbed "nvim installed"
+  else
+    error "nvim installation failed"
+  fi
 
-  popd > /dev/null
-  rm -r $tmp_dir
+  popd > /dev/null || return 1
+  rm -r "$tmp_dir"
 
   printf "\n" 
 }
 
 install_7z() {
   url="https://www.7-zip.org/a/7z2107-linux-x64.tar.xz"
-  archive=$(basename $url)
+  archive=$(basename "$url")
 
   info "7z [${BLUE}${UNDERLINE}$url${NO_COLOR}]"
 
   tmp_dir="$(mktemp -d)"
-  pushd $tmp_dir > /dev/null
+  pushd "$tmp_dir" > /dev/null || return 1
 
   download "$archive" "$url" || return 1
   unpack 7z2107-linux-x64.tar.xz || return 1
-  
-  mv -f 7zzs $BIN_DIR/7z \
-    && chmod +x "$BIN_DIR/7z" \
-    && completed_tabbed "Installed" \
-    || error "Failed to install 7z"
 
-  popd > /dev/null
-  rm -r $tmp_dir
+  if mv -f 7zzs "$BIN_DIR/7z" && chmod +x "$BIN_DIR/7z"; then
+    completed_tabbed "7z installed"
+  else
+    error "7z installation failed"
+  fi
+
+  popd > /dev/null || return 1
+  rm -r "$tmp_dir"
   
+  printf "\n"
+}
+
+install_shellcheck() {
+  ext=".tar.xz"
+  grep_pattern="https.*shellcheck.*${PLATFORM}.*${ARCH}${ext}$"
+  url="$(curl -s https://api.github.com/repos/koalaman/shellcheck/releases/latest | jq -r '.assets[].browser_download_url' | grep "${grep_pattern}")"
+  archive=$(basename "$url")
+
+  info "shellcheck [${BLUE}${UNDERLINE}$url${NO_COLOR}]"
+
+  tmp_dir="$(mktemp -d)"
+  pushd "$tmp_dir" > /dev/null || return 1
+
+  download "$archive" "$url" || return 1
+  unpack "$archive" || return 1
+
+  extracted=$(find . -mindepth 1 -maxdepth 1 -type d)
+  if [ ! -d "$extracted" ]; then
+    error "Extracted archive not found"
+    return 1
+  fi
+
+  if mv -f "$extracted/shellcheck" "$BIN_DIR/shellcheck" && chmod +x "$BIN_DIR/shellcheck"; then
+    completed_tabbed "shellcheck installed"
+  else
+    error "shellcheck installation failed"
+  fi
+
+  popd > /dev/null || return 1
+  rm -r "$tmp_dir"
+
   printf "\n"
 }
 
@@ -419,24 +460,25 @@ install_docker_compose() {
   grep_pattern="https.*${PLATFORM}-${ARCH}$"
   url=$(curl -s $base_url | jq -r '.assets[].browser_download_url' | grep "${grep_pattern}")
   target_dir="${DOCKER_CONFIG:-$HOME/.docker}/cli-plugins"
-  if [ ! -d $target_dir ]; then
-    mkdir -p $target_dir
+  if [ ! -d "$target_dir" ]; then
+    mkdir -p "$target_dir"
   fi
 
   info "docker-compose [${BLUE}${UNDERLINE}$url${NO_COLOR}]"
 
   tmp_dir="$(mktemp -d)"
-  pushd $tmp_dir > /dev/null
+  pushd "$tmp_dir" > /dev/null || return 1
 
-  download "$(basename $url)" "$url" || return 1
+  download "$(basename "$url")" "$url" || return 1
 
-  mv -f "$(basename $url)" $target_dir/docker-compose \
-    && chmod +x $target_dir/docker-compose \
-    && completed_tabbed "Installed in ${GREEN}$target_dir${NO_COLOR}" \
-    || error "Failed to install docker-compose"
+  if mv -f "$(basename "$url")" "$target_dir" && chmod +x "$target_dir/docker-compose"; then
+    completed_tabbed "docker-compose installed. Installed in ${GREEN}$target_dir${NO_COLOR}"
+  else
+    error "Failed to install docker-compose"
+  fi
 
-  popd > /dev/null
-  rm -r $tmp_dir
+  popd > /dev/null || return 1
+  rm -r "$tmp_dir"
   
   printf "\n"
 }
@@ -450,19 +492,19 @@ install_base_packages() {
     exit 1
   fi
   info "sudo apt-get update"
-  sudo apt-get update 2>&1 > /dev/null
+  sudo apt-get update > /dev/null 2>&1
   info "sudo apt-get upgrade"
-  sudo apt-get upgrade -y 2>&1 > /dev/null
+  sudo apt-get upgrade -y 2> /dev/null 2>&1
 
   for i in "${packages[@]}"; do
-    if ! has $i; then
+    if ! has "$i"; then
       info "sudo apt-get install -y $i"
-      sudo apt-get install -y $i 2>&1 > /dev/null
+      sudo apt-get install -y "$i" > /dev/null 2>&1
     fi
   done
 
   if ! [[ $SHELL == *zsh* ]]; then
-    chsh -s $(which zsh) || rc=$?
+    chsh -s "$(which zsh)" || rc=$?
 
     if [[ $rc == 0 ]]; then
       completed "Default shell changed to ZSH"
@@ -488,6 +530,7 @@ install_docker
 install_docker_compose
 install_nnn
 install_nvim
+install_shellcheck
 install_7z
 
 printf '\n'
