@@ -483,6 +483,38 @@ install_docker_compose() {
   printf "\n"
 }
 
+install_delta() {
+  ext=".tar.gz"
+  grep_pattern="https.*delta.*${ARCH}.*${PLATFORM}.*gnu.*${ext}$"
+  url=$(curl -s https://api.github.com/repos/dandavison/delta/releases/latest | jq -r '.assets[].browser_download_url' | grep "${grep_pattern}")
+  archive=$(basename "$url")
+
+  info "delta [${BLUE}${UNDERLINE}$url${NO_COLOR}]"
+
+  tmp_dir="$(mktemp -d)"
+  pushd "$tmp_dir" > /dev/null || return 1
+
+  download "$archive" "$url" || return 1
+  unpack "$archive" || return 1
+
+  extracted=$(find . -mindepth 1 -maxdepth 1 -type d)
+  if [ ! -d "$extracted" ]; then
+    error "Extracted archive not found"
+    return 1
+  fi
+
+  if mv -f "$extracted/delta" "$BIN_DIR/delta" && chmod +x "$BIN_DIR/delta"; then
+    completed_tabbed "delta installed"
+  else
+    error "delta installation failed"
+  fi
+
+  popd > /dev/null || return 1
+  rm -r "$tmp_dir"
+  
+  printf "\n"
+}
+
 install_base_packages() {
   packages=( "zsh" "zip" "unzip" "curl" "wget" "stow" "jq" )
 
@@ -532,6 +564,7 @@ install_nnn
 install_nvim
 install_shellcheck
 install_7z
+install_delta
 
 printf '\n'
 completed "All done."
