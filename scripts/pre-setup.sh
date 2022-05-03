@@ -11,6 +11,7 @@ printf "\n"
 sudo apt update && sudo apt upgrade -y
 
 # Installing dependencies
+echo "Installing dependencies..."
 sudo apt install -y zsh \
   zip \
   unzip \
@@ -20,6 +21,14 @@ sudo apt install -y zsh \
   jq \
   git
 
+# Cloning dotfiles repository from github
+echo "Cloning the dotfiles repository"
+URL="https://github.com/agusthas/dotfiles.git"
+git clone --depth 1 "$URL" "$HOME/dotfiles" || exit 1
+printf "\n"
+
+# GitHub CLI installation
+echo "GitHub CLI installation"
 if ! command -v gh >/dev/null 2>&1; then
   curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
   echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null

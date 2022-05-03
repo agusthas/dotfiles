@@ -64,6 +64,7 @@ install_fzf() {
     info "Updating FZF"
     git -C "$TARGET_BIN_DIR" pull --rebase --force > /dev/null 2>&1
   fi
+  ~/.fzf/install --completion --key-bindings --no-update-rc > /dev/null 2>&1
 
   completed "FZF"
   printf "\n"
@@ -428,4 +429,4 @@ install_docker_compose
 printf "\n"
 completed "Applications installed."
 info "If you encounters error messages, please ${BOLD}FIX THE SCRIPTS!${NO_COLOR}"
-info "  Once you're done, run ${BOLD}\`applications.sh\`${NO_COLOR} to re-install the applications."
+echo "    Once you're done, run ${BOLD}\`applications.sh\`${NO_COLOR} to re-install the applications."

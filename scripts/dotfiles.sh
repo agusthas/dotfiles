@@ -11,15 +11,14 @@ stow_dotfiles() {
 }
 
 info "Linking dotfiles to home directory..."
-stow zsh
-stow p10k
-stow git
-stow nvim
-stow binaries
+stow_dotfiles zsh
+stow_dotfiles p10k
+stow_dotfiles git
+stow_dotfiles nvim
+stow_dotfiles binaries
 
 printf "\n"
 info "If there's an error with stow, it might be a conflict between the files"
-info "  in your home directory and the dotfiles."
-info "  use the ${YELLOW}diff${NO_COLOR} command to see what's different."
+echo "    in your home directory and the dotfiles. Use the ${YELLOW}diff${NO_COLOR} command to see what's different."
 info "Once you're done, delete the files in your home directory"
-info "  and run ${BOLD}\`dotfiles.sh\`${NO_COLOR} script again."
+echo "    and run ${BOLD}\`dotfiles.sh\`${NO_COLOR} script again."
