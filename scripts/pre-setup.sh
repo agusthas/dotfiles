@@ -17,7 +17,8 @@ sudo apt install -y zsh \
   curl \
   wget \
   stow \
-  jq
+  jq \
+  git
 
 if ! command -v gh >/dev/null 2>&1; then
   curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
