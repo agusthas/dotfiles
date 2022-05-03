@@ -26,13 +26,17 @@ if ! command -v gh >/dev/null 2>&1; then
   sudo apt update
   sudo apt install gh
 fi
+printf "\n"
 
 # If shell not zsh, change shell to zsh
 if ! echo "$SHELL" | grep -q "zsh"; then
   echo "Changing shell to zsh"
   
-  if ! sudo chsh -s "$(which zsh)"; then
-    echo "Failed to change shell to zsh. Please try again with command 'chsh -s \$(which zsh)'"
+  if ! chsh -s "$(which zsh)"; then
+    echo "Failed to change shell to zsh."
+    echo "  Please manually change shell to zsh."
+    echo "  You can do this by running:"
+    echo "    chsh -s \$(which zsh)"
     exit 1
   fi
 
