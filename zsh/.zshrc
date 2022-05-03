@@ -113,6 +113,20 @@ export EDITOR='nvim'
 alias :q="exit"
 alias clr='clear; echo Currently logged in on $TTY, as $USERNAME in directory $PWD.'
 
+function fif() {
+  if [ ! "$#" -gt 0 ]; then echo "Usage: fif <search-term>"; return 1; fi
+
+  if ! command -v rg >/dev/null 2>&1; then
+    echo "rg is not installed. Please install ripgrep."
+    return 1
+  fi
+
+  rg --files-with-matches --no-messages "$1" | fzf --no-info \
+    --header '?:toggle-preview' \
+    --preview "bat --color=always {} 2>/dev/null | rg --colors 'match:bg:yellow' --ignore-case --context 5 '$1' || rg --ignore-case --pretty --context 5 '$1' {}" \
+    --bind='?:toggle-preview'
+}
+
 function fns() {
   local scripts script_name
   local package_manager
