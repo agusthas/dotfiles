@@ -133,47 +133,24 @@ function fif() {
 
 function fns() {
   local scripts script_name
-  local package_manager
+  local cmd
 
-  while getopts 'hp:' OPTION; do
-    case "$OPTION" in
-      p)
-        package_manager="$OPTARG"
-        ;;
-      h)
-        echo "usage: $(basename "$0") [-h] [-p package_manager]"
-        return 0
-        ;;
-      ?)
-        echo "usage: $(basename "$0") [-l] [-p package_manager]" >&2
-        return 1
-        ;;
-    esac
-  done
+  if ! cat package.json > /dev/null 2>&1; then echo "fns: Error: No package.json found."; return 1; fi
+  scripts=$(jq -r '.scripts | to_entries[] | "\"\(.key)\": \"\(.value)\""' package.json | fzf --reverse --height=40%)
 
-  # Get script name
-  if cat package.json > /dev/null 2>&1; then
-    scripts=$(cat package.json | jq -r '.scripts | to_entries[] | "\"\(.key)\": \"\(.value)\""' | fzf --reverse --height=40%)
+  if ! [[ -n "$scripts" ]]; then echo "fns: Error: No scripts found."; return 1; fi
+  script_name=$(echo "$scripts" | awk -F ': ' '{gsub(/"/, "", $1); print $1}')
 
-    if [[ -n $scripts ]]; then
-      script_name=$(echo $scripts | awk -F ': ' '{gsub(/"/, "", $1); print $1}')
-    else
-      echo "fns: Exit: Please select any script"
-      return 1
-    fi
+  if command -v yarn >/dev/null 2>&1; then
+    cmd="yarn"
+  elif command -v npm >/dev/null 2>&1; then
+    cmd="npm run"
   else
-    echo "fns: Error: No package.json in current directory"
+    echo "fns: Error: No package manager found"
     return 1
   fi
-
-  case "$package_manager" in
-    yarn)
-      yarn $script_name
-      ;;
-    *)
-      npm run $script_name
-      ;;
-  esac
+  
+  $cmd "$script_name"
 }
 
 function fzf_alias() {
