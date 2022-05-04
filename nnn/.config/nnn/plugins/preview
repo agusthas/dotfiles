@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+handle_text() {
+  if type bat >/dev/null 2>&1; then
+    bat --color=always --paging=always --plain "$1"
+  else
+    less "$1"
+  fi
+}
+
+if [ -n "$1" ]; then
+  handle_text "$1"
+fi
