@@ -2,7 +2,7 @@
 
 . "$(dirname "$0")"/.nnn-plugin-helper
 
-CTX=0
+CTX=+
 LIST="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/bookmarks"
 
 if ! type fzf >/dev/null 2>&1; then
