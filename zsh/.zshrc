@@ -47,7 +47,7 @@ DISABLE_MAGIC_FUNCTIONS="true"
 # DISABLE_LS_COLORS="true"
 
 # Uncomment the following line to disable auto-setting terminal title.
-DISABLE_AUTO_TITLE="true"
+# DISABLE_AUTO_TITLE="true"
 
 # Uncomment the following line to enable command auto-correction.
 # ENABLE_CORRECTION="true"
@@ -79,7 +79,7 @@ DISABLE_AUTO_TITLE="true"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(docker-compose gh fnm fd pass fzf z)
+plugins=(docker docker-compose gh fnm fd pass fzf)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -90,14 +90,12 @@ source $ZSH/oh-my-zsh.sh
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
 
-# Preferred editor for local and remote sessions
-export EDITOR='nvim'
-
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
+# Preferred editor
+if command -v nvim >/dev/null 2>&1; then
+  export EDITOR='nvim'
+else 
+  export EDITOR='vim'
+fi
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
@@ -112,6 +110,12 @@ export EDITOR='nvim'
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias :q="exit"
 alias clr='clear; echo Currently logged in on $TTY, as $USERNAME in directory $PWD.'
+
+alias g="git"
+alias gst='git status'
+alias gf='git fetch'
+alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
+alias gunwip='git log -n 1 | grep -q -c "\-\-wip\-\-" && git reset HEAD~1'
 
 function fif() {
   if [ ! "$#" -gt 0 ]; then echo "Usage: fif <search-term>"; return 1; fi
@@ -129,47 +133,24 @@ function fif() {
 
 function fns() {
   local scripts script_name
-  local package_manager
+  local cmd
 
-  while getopts 'hp:' OPTION; do
-    case "$OPTION" in
-      p)
-        package_manager="$OPTARG"
-        ;;
-      h)
-        echo "usage: $(basename "$0") [-h] [-p package_manager]"
-        return 0
-        ;;
-      ?)
-        echo "usage: $(basename "$0") [-l] [-p package_manager]" >&2
-        return 1
-        ;;
-    esac
-  done
+  if ! cat package.json > /dev/null 2>&1; then echo "fns: Error: No package.json found."; return 1; fi
+  scripts=$(jq -r '.scripts | to_entries[] | "\"\(.key)\": \"\(.value)\""' package.json | fzf --reverse --height=40%)
 
-  # Get script name
-  if cat package.json > /dev/null 2>&1; then
-    scripts=$(cat package.json | jq -r '.scripts | to_entries[] | "\"\(.key)\": \"\(.value)\""' | fzf --reverse --height=40%)
+  if ! [[ -n "$scripts" ]]; then echo "fns: Error: No scripts found."; return 1; fi
+  script_name=$(echo "$scripts" | awk -F ': ' '{gsub(/"/, "", $1); print $1}')
 
-    if [[ -n $scripts ]]; then
-      script_name=$(echo $scripts | awk -F ': ' '{gsub(/"/, "", $1); print $1}')
-    else
-      echo "fns: Exit: Please select any script"
-      return 1
-    fi
+  if command -v yarn >/dev/null 2>&1; then
+    cmd="yarn"
+  elif command -v npm >/dev/null 2>&1; then
+    cmd="npm run"
   else
-    echo "fns: Error: No package.json in current directory"
+    echo "fns: Error: No package manager found"
     return 1
   fi
-
-  case "$package_manager" in
-    yarn)
-      yarn $script_name
-      ;;
-    *)
-      npm run $script_name
-      ;;
-  esac
+  
+  $cmd "$script_name"
 }
 
 function fzf_alias() {
@@ -208,7 +189,7 @@ function zshaddhistory() {
   fi
 }
 
-export NNN_PLUG='b:fzf-bookmarks;p:preview'
+export NNN_PLUG='b:fzf-bookmarks;p:preview-tui'
 function n() {
   # Block nesting of nnn in subshells
   if [ -n $NNNLVL ] && [ "${NNNLVL:-0}" -ge 1 ]; then
@@ -221,15 +202,15 @@ function n() {
   # see. To cd on quit only on ^G, remove the "export" and make sure not to
   # use a custom path, i.e. set NNN_TMPFILE *exactly* as follows:
   #     NNN_TMPFILE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.lastd"
-  export NNN_TMPFILE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.lastd"
+  NNN_TMPFILE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.lastd"
 
   # Unmask ^Q (, ^V etc.) (if required, see `stty -a`) to Quit nnn
-  stty start undef
-  stty stop undef
+  # stty start undef
+  # stty stop undef
   # stty lwrap undef
   # stty lnext undef
 
-  nnn -Q "$@"
+  nnn -aQ "$@"
 
   if [ -f "$NNN_TMPFILE" ]; then
     . "$NNN_TMPFILE"
