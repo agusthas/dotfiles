@@ -19,7 +19,8 @@ sudo apt install -y zsh \
   wget \
   stow \
   jq \
-  git
+  git \
+  tmux
 
 # Cloning dotfiles repository from github
 echo "Cloning the dotfiles repository"
