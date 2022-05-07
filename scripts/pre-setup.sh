@@ -37,18 +37,12 @@ if ! command -v gh >/dev/null 2>&1; then
 fi
 printf "\n"
 
-# If shell not zsh, change shell to zsh
+# If shell not zsh, WARN to change it
 if ! echo "$SHELL" | grep -q "zsh"; then
-  echo "Changing shell to zsh"
-  
-  if ! chsh -s "$(which zsh)"; then
-    echo "Failed to change shell to zsh."
-    echo "  Please manually change shell to zsh."
-    echo "  You can do this by running:"
-    echo "    chsh -s \$(which zsh)"
-    exit 1
-  fi
-
-  echo "Shell changed to zsh"
-  echo "Please logout and login again to apply changes"
+  echo "Please manually change shell to zsh."
+  echo "You can do this by running:"
+  echo "  chsh -s \$(which zsh)"
 fi
+printf "\n"
+
+echo "Done"
