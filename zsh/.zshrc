@@ -133,7 +133,7 @@ function fif() {
 
 function fns() {
   local scripts script_name
-  local cmd
+  local run_cmd
 
   if ! cat package.json > /dev/null 2>&1; then echo "fns: Error: No package.json found."; return 1; fi
   scripts=$(jq -r '.scripts | to_entries[] | "\"\(.key)\": \"\(.value)\""' package.json | fzf --reverse --height=40%)
@@ -142,15 +142,27 @@ function fns() {
   script_name=$(echo "$scripts" | awk -F ': ' '{gsub(/"/, "", $1); print $1}')
 
   if command -v yarn >/dev/null 2>&1; then
-    cmd="yarn"
+    run_cmd="yarn"
   elif command -v npm >/dev/null 2>&1; then
-    cmd="npm run"
+    run_cmd="npm run"
   else
     echo "fns: Error: No package manager found"
     return 1
   fi
   
-  $cmd "$script_name"
+  if [[ -n "$TMUX" ]]; then
+    local session_name=$(tmux display-message -p '#S')
+    local window_name=$(echo "node__$script_name" | tr ":" "__")
+    local target="$session_name:$window_name"
+
+    if ! tmux has-session -t "$target" 2>/dev/null; then
+      tmux new-window -dn "$window_name"
+    fi
+
+    tmux send-keys -t "$target" "$run_cmd $script_name" ENTER
+  else
+    $run_cmd "$script_name"
+  fi
 }
 
 function fzf_alias() {
