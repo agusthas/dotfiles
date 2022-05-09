@@ -136,6 +136,39 @@ install_fd() {
   printf "\n"
 }
 
+install_rg() {
+  GH_REPO="BurntSushi/ripgrep"
+  GH_ASSET_PATTERN="*x86_64*linux*musl.tar.gz"
+  TARGET_BIN_DIR="$BIN_DIR"
+
+  info "rg [${BLUE}${UNDERLINE}$GH_REPO${NO_COLOR}]"
+
+  tmp_dir=$(get_tmpdir)
+  pushd "$tmp_dir" > /dev/null || return 1
+
+  gh_download "$GH_REPO" "$GH_ASSET_PATTERN"
+
+  EXECUTABLE=$(find . -type f -name "rg")
+  if [ -z "$EXECUTABLE" ]; then
+    error "Executable not found."
+  fi
+
+  if [ ! -f "$EXECUTABLE" ]; then
+    error "Executable is not of type file."
+  else
+    NAME="rg"
+    info "moving $(basename "$EXECUTABLE") binary as ${MAGENTA}${BOLD}$NAME${NO_COLOR} to ${CYAN}${UNDERLINE}$TARGET_BIN_DIR${NO_COLOR}."
+    mv "$EXECUTABLE" "$TARGET_BIN_DIR/$NAME"
+    chmod +x "$TARGET_BIN_DIR/$NAME"
+  fi
+
+  popd > /dev/null || return 1
+  rm -r "$tmp_dir"
+
+  completed "cleanup"
+  printf "\n"
+}
+
 install_fnm() {
   GH_REPO="Schniz/fnm"
   GH_ASSET_PATTERN="*linux*.zip"
@@ -420,6 +453,7 @@ install_nnn
 install_nvim
 install_fnm
 install_fd
+install_rg
 install_bat
 install_7z
 install_shellcheck
