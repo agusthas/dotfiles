@@ -77,7 +77,7 @@ DISABLE_MAGIC_FUNCTIONS="true"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(docker docker-compose gh fnm fd pass fzf zsh-syntax-highlighting)
+plugins=(git docker docker-compose gh fnm fd pass fzf zsh-syntax-highlighting)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -109,9 +109,6 @@ fi
 alias :q="exit"
 alias clr='clear; echo Currently logged in on $TTY, as $USERNAME in directory $PWD.'
 
-alias g="git"
-alias gst='git status'
-alias gf='git fetch'
 alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
 alias gunwip='git log -n 1 | grep -q -c "\-\-wip\-\-" && git reset HEAD~1'
 alias getrandom='openssl rand -base64 32'
