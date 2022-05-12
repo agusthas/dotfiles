@@ -132,6 +132,43 @@ function gmove() {
   git stash pop
 }
 
+function __docker_pre_test() {
+  if [[ -z "$1" ]] && [[ $(docker ps --format '{{.Names}}') ]]; then
+    return 0;
+  fi
+
+  if [[ ! -z "$1" ]] && [[ $(docker ps -a --format '{{.Names}}') ]]; then
+    return 0;
+  fi
+
+  echo "No containers found";
+  return 1;
+}
+
+function fds() {
+  local format="table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Ports}}"
+
+  __docker_pre_test \
+    && docker ps --format "$format" \
+      | fzf --multi --header-lines=1 --height=40% --reverse --no-info \
+      | awk '{print $2}' \
+      | while read -r name; do
+          docker stop $name
+        done 
+}
+
+function fdst() {
+  local format="table {{.ID}}\t{{.Names}}\t{{.Status}}\t{{.Image}}"
+
+  __docker_pre_test "all" \
+    && docker ps -a --format "$format" \
+      | fzf --multi --header-lines=1 --height=40% --reverse --no-info \
+      | awk '{print $2}' \
+      | while read -r name; do
+          docker start $name
+        done
+}
+
 function fif() {
   if [ ! "$#" -gt 0 ]; then echo "Usage: fif <search-term>"; return 1; fi
 
