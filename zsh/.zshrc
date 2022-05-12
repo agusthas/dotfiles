@@ -114,6 +114,7 @@ alias gst='git status'
 alias gf='git fetch'
 alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
 alias gunwip='git log -n 1 | grep -q -c "\-\-wip\-\-" && git reset HEAD~1'
+alias getrandom='openssl rand -base64 32'
 
 function gmove() {
   git stash -- $(git diff --staged --name-only) && gwip
