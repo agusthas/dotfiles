@@ -200,10 +200,28 @@ function toggle_comment() {
   zle reset-prompt
 }
 
+# Open tmux
+function tmux_open() {
+  local current_dir=$(basename "$PWD")
+  local session_name=$(echo "$current_dir" | tr " " "_")
+
+  if [[ -n "$TMUX" ]]; then
+    echo "tmux_open: Error: Already in tmux session."
+    return 1
+  fi
+
+  if ! tmux has-session -t "$session_name" 2>/dev/null; then
+    tmux new-session -s "$session_name" -d
+  fi
+
+  tmux attach -t "$session_name"
+}
+
 zle -N fzf_alias
 bindkey -M emacs '\ea' fzf_alias
 zle -N toggle_comment
 bindkey -M emacs '^[/' toggle_comment
+bindkey -s '^T' '^u tmux_open^M'
 
 # Remove commented command from history
 function zshaddhistory() {
