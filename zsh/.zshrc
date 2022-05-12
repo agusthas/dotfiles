@@ -218,7 +218,11 @@ function fzf_alias() {
   setopt pipefail 2> /dev/null
   local selected ret
   selected=( $(alias | fzf --query="$BUFFER" | sed -re 's/=.+$/ /') )
-  LBUFFER="${LBUFFER}${selected} "
+  if [ -z "$selected" ]; then
+    LBUFFER="$LBUFFER"
+  else
+    LBUFFER="${LBUFFER}${selected} "
+  fi
   ret=$?
   zle reset-prompt
   return $ret
