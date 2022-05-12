@@ -117,6 +117,14 @@ alias gunwip='git log -n 1 | grep -q -c "\-\-wip\-\-" && git reset HEAD~1'
 alias getrandom='openssl rand -base64 32'
 
 function gmove() {
+  local usage="Usage: gmove <new-branch> <ref-branch-name>"
+  local new_branch="$1"
+  local ref_branch="$2"
+  if [ -z "$new_branch" ] || [ -z "$ref_branch" ]; then
+    echo "$usage"
+    return 1
+  fi
+  
   git stash -- $(git diff --staged --name-only) && gwip
 
   git branch $1 $2
