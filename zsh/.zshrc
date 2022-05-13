@@ -199,19 +199,7 @@ function fns() {
     return 1
   fi
   
-  if [[ -n "$TMUX" ]]; then
-    local session_name=$(tmux display-message -p '#S')
-    local window_name=$(echo "node__$script_name" | tr ":" "__")
-    local target="$session_name:$window_name"
-
-    if ! tmux has-session -t "$target" 2>/dev/null; then
-      tmux new-window -dn "$window_name"
-    fi
-
-    tmux send-keys -t "$target" "$run_cmd $script_name" ENTER
-  else
-    $run_cmd "$script_name"
-  fi
+  $run_cmd "$script_name"
 }
 
 function fzf_alias() {
