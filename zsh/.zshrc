@@ -77,7 +77,7 @@ DISABLE_MAGIC_FUNCTIONS="true"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git docker docker-compose gh fnm fd pass fzf zsh-syntax-highlighting)
+plugins=(git gh fnm fd pass fzf zsh-syntax-highlighting)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -125,7 +125,7 @@ function gmove() {
   git stash -- $(git diff --staged --name-only) && gwip
 
   git branch $1 $2
-  git checkout $1
+  git switch $1
   git stash pop
 }
 
@@ -176,7 +176,7 @@ function fif() {
 
   rg --files-with-matches --no-messages "$1" | fzf --no-info \
     --header '?:toggle-preview' \
-    --preview "bat --color=always {} 2>/dev/null | rg --colors 'match:bg:yellow' --ignore-case --context 5 '$1' || rg --ignore-case --pretty --context 5 '$1' {}" \
+    --preview "rg --ignore-case --pretty --context 5 '$1' {}" \
     --bind='?:toggle-preview'
 }
 
@@ -203,28 +203,15 @@ function fns() {
 }
 
 function fzf_alias() {
-  setopt pipefail 2> /dev/null
-  local selected ret
-  selected=( $(alias | fzf --query="$BUFFER" | sed -re 's/=.+$/ /') )
-  if [ -z "$selected" ]; then
-    LBUFFER="$LBUFFER"
-  else
-    LBUFFER="${LBUFFER}${selected} "
+  local selection=$(alias | fzf --query="$BUFFER" | sed -re 's/=.+$/ /')
+
+  if [[ -n "$selection" ]]; then
+    LBUFFER="$selection"
+
+    zle reset-prompt
   fi
-  ret=$?
-  zle reset-prompt
-  return $ret
 }
 
-# Toggle comments
-function toggle_comment() {
-  if [[ "$BUFFER" =~ "(^#\s+|^\s+#)" ]]; then
-    BUFFER=$(sed -E 's/(^#\s+|^\s+#)//' <<< "$BUFFER")
-  else
-    BUFFER="# $BUFFER"
-  fi
-  zle reset-prompt
-}
 
 # Open tmux
 function tmux_open() {
@@ -242,12 +229,11 @@ function tmux_open() {
 
   tmux attach -t "$session_name"
 }
+bindkey -s '^T' '^u tmux_open^M'
 
 zle -N fzf_alias
 bindkey -M emacs '\ea' fzf_alias
-zle -N toggle_comment
-bindkey -M emacs '^[/' toggle_comment
-bindkey -s '^T' '^u tmux_open^M'
+
 
 # Remove commented command from history
 function zshaddhistory() {
