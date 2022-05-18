@@ -105,6 +105,7 @@ alias clr='clear; echo Currently logged in on $TTY, as $USERNAME in directory $P
 alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
 alias gunwip='git log -n 1 | grep -q -c "\-\-wip\-\-" && git reset HEAD~1'
 alias getrandom='openssl rand -base64 32'
+alias lg='lazygit'
 
 function gmove() {
   local usage="Usage: gmove <new-branch> <ref-branch-name>"
