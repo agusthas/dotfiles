@@ -246,7 +246,7 @@ function zshaddhistory() {
   fi
 }
 
-export NNN_PLUG='b:fzf-bookmarks;p:preview-tui'
+export NNN_PLUG='b:fzf-bookmarks;p:preview;f:quick-find'
 function n() {
   # Block nesting of nnn in subshells
   if [ -n $NNNLVL ] && [ "${NNNLVL:-0}" -ge 1 ]; then
