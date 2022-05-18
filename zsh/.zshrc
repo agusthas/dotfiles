@@ -1,14 +1,5 @@
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
-
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:$PATH
-# typeset -U path
-# path=($HOME/bin "$path[@]")
 
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
@@ -79,7 +70,7 @@ DISABLE_MAGIC_FUNCTIONS="true"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(docker docker-compose gh fnm fd pass fzf)
+plugins=(git gh fnm fd pass fzf zsh-syntax-highlighting)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -111,11 +102,63 @@ fi
 alias :q="exit"
 alias clr='clear; echo Currently logged in on $TTY, as $USERNAME in directory $PWD.'
 
-alias g="git"
-alias gst='git status'
-alias gf='git fetch'
 alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
 alias gunwip='git log -n 1 | grep -q -c "\-\-wip\-\-" && git reset HEAD~1'
+alias getrandom='openssl rand -base64 32'
+alias lg='lazygit'
+
+function gmove() {
+  local usage="Usage: gmove <new-branch> <ref-branch-name>"
+  local new_branch="$1"
+  local ref_branch="$2"
+  if [ -z "$new_branch" ] || [ -z "$ref_branch" ]; then
+    echo "$usage"
+    return 1
+  fi
+  
+  git stash -- $(git diff --staged --name-only) && gwip
+
+  git branch $1 $2
+  git switch $1
+  git stash pop
+}
+
+function __docker_pre_test() {
+  if [[ -z "$1" ]] && [[ $(docker ps --format '{{.Names}}') ]]; then
+    return 0;
+  fi
+
+  if [[ ! -z "$1" ]] && [[ $(docker ps -a --format '{{.Names}}') ]]; then
+    return 0;
+  fi
+
+  echo "No containers found";
+  return 1;
+}
+
+function fds() {
+  local format="table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Ports}}"
+
+  __docker_pre_test \
+    && docker ps --format "$format" \
+      | fzf --multi --header-lines=1 --height=40% --reverse --no-info \
+      | awk '{print $2}' \
+      | while read -r name; do
+          docker stop $name
+        done 
+}
+
+function fdst() {
+  local format="table {{.ID}}\t{{.Names}}\t{{.Status}}\t{{.Image}}"
+
+  __docker_pre_test "all" \
+    && docker ps -a --format "$format" \
+      | fzf --multi --header-lines=1 --height=40% --reverse --no-info \
+      | awk '{print $2}' \
+      | while read -r name; do
+          docker start $name
+        done
+}
 
 function fif() {
   if [ ! "$#" -gt 0 ]; then echo "Usage: fif <search-term>"; return 1; fi
@@ -127,13 +170,13 @@ function fif() {
 
   rg --files-with-matches --no-messages "$1" | fzf --no-info \
     --header '?:toggle-preview' \
-    --preview "bat --color=always {} 2>/dev/null | rg --colors 'match:bg:yellow' --ignore-case --context 5 '$1' || rg --ignore-case --pretty --context 5 '$1' {}" \
+    --preview "rg --ignore-case --pretty --context 5 '$1' {}" \
     --bind='?:toggle-preview'
 }
 
 function fns() {
   local scripts script_name
-  local cmd
+  local run_cmd
 
   if ! cat package.json > /dev/null 2>&1; then echo "fns: Error: No package.json found."; return 1; fi
   scripts=$(jq -r '.scripts | to_entries[] | "\"\(.key)\": \"\(.value)\""' package.json | fzf --reverse --height=40%)
@@ -142,41 +185,49 @@ function fns() {
   script_name=$(echo "$scripts" | awk -F ': ' '{gsub(/"/, "", $1); print $1}')
 
   if command -v yarn >/dev/null 2>&1; then
-    cmd="yarn"
+    run_cmd="yarn"
   elif command -v npm >/dev/null 2>&1; then
-    cmd="npm run"
+    run_cmd="npm run"
   else
     echo "fns: Error: No package manager found"
     return 1
   fi
   
-  $cmd "$script_name"
+  $run_cmd "$script_name"
 }
 
 function fzf_alias() {
-  setopt pipefail 2> /dev/null
-  local selected ret
-  selected=( $(alias | fzf --query="$BUFFER" | sed -re 's/=.+$/ /') )
-  LBUFFER="${LBUFFER}${selected} "
-  ret=$?
-  zle reset-prompt
-  return $ret
+  local selection=$(alias | fzf --query="$BUFFER" | sed -re 's/=.+$/ /')
+
+  if [[ -n "$selection" ]]; then
+    LBUFFER="$selection"
+
+    zle reset-prompt
+  fi
 }
 
-# Toggle comments
-function toggle_comment() {
-  if [[ "$BUFFER" =~ "(^#\s+|^\s+#)" ]]; then
-    BUFFER=$(sed -E 's/(^#\s+|^\s+#)//' <<< "$BUFFER")
-  else
-    BUFFER="# $BUFFER"
+
+# Open tmux
+function tmux_open() {
+  local current_dir=$(basename "$PWD")
+  local session_name=$(echo "$current_dir" | tr " " "_")
+
+  if [[ -n "$TMUX" ]]; then
+    echo "tmux_open: Error: Already in tmux session."
+    return 1
   fi
-  zle reset-prompt
+
+  if ! tmux has-session -t "$session_name" 2>/dev/null; then
+    tmux new-session -s "$session_name" -d
+  fi
+
+  tmux attach -t "$session_name"
 }
+bindkey -s '^T' '^u tmux_open^M'
 
 zle -N fzf_alias
 bindkey -M emacs '\ea' fzf_alias
-zle -N toggle_comment
-bindkey -M emacs '^[/' toggle_comment
+
 
 # Remove commented command from history
 function zshaddhistory() {
@@ -189,7 +240,7 @@ function zshaddhistory() {
   fi
 }
 
-export NNN_PLUG='b:fzf-bookmarks;p:preview-tui'
+export NNN_PLUG='b:fzf-bookmarks;p:preview;f:quick-find'
 function n() {
   # Block nesting of nnn in subshells
   if [ -n $NNNLVL ] && [ "${NNNLVL:-0}" -ge 1 ]; then
@@ -217,6 +268,9 @@ function n() {
     rm -f "$NNN_TMPFILE" > /dev/null
   fi
 }
+
+# fnm
+eval "$(fnm env --use-on-cd)"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
