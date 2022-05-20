@@ -4,7 +4,7 @@
 [core]
 	editor = code --wait
 	pager = delta
-	excludesFile = /home/susumantan/.gitignore
+	excludesFile = ~/.gitignore
 [diff]
   tool = default-difftool
 [alias]
