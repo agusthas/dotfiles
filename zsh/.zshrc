@@ -106,6 +106,7 @@ alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commi
 alias gunwip='git log -n 1 | grep -q -c "\-\-wip\-\-" && git reset HEAD~1'
 alias getrandom='openssl rand -base64 32'
 alias lg='lazygit'
+alias dco='docker compose'
 
 function gmove() {
   local usage="Usage: gmove <new-branch> <ref-branch-name>"
@@ -121,43 +122,6 @@ function gmove() {
   git branch $1 $2
   git switch $1
   git stash pop
-}
-
-function __docker_pre_test() {
-  if [[ -z "$1" ]] && [[ $(docker ps --format '{{.Names}}') ]]; then
-    return 0;
-  fi
-
-  if [[ ! -z "$1" ]] && [[ $(docker ps -a --format '{{.Names}}') ]]; then
-    return 0;
-  fi
-
-  echo "No containers found";
-  return 1;
-}
-
-function fds() {
-  local format="table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Ports}}"
-
-  __docker_pre_test \
-    && docker ps --format "$format" \
-      | fzf --multi --header-lines=1 --height=40% --reverse --no-info \
-      | awk '{print $2}' \
-      | while read -r name; do
-          docker stop $name
-        done 
-}
-
-function fdst() {
-  local format="table {{.ID}}\t{{.Names}}\t{{.Status}}\t{{.Image}}"
-
-  __docker_pre_test "all" \
-    && docker ps -a --format "$format" \
-      | fzf --multi --header-lines=1 --height=40% --reverse --no-info \
-      | awk '{print $2}' \
-      | while read -r name; do
-          docker start $name
-        done
 }
 
 function fif() {
@@ -206,28 +170,8 @@ function fzf_alias() {
   fi
 }
 
-
-# Open tmux
-function tmux_open() {
-  local current_dir=$(basename "$PWD")
-  local session_name=$(echo "$current_dir" | tr " " "_")
-
-  if [[ -n "$TMUX" ]]; then
-    echo "tmux_open: Error: Already in tmux session."
-    return 1
-  fi
-
-  if ! tmux has-session -t "$session_name" 2>/dev/null; then
-    tmux new-session -s "$session_name" -d
-  fi
-
-  tmux attach -t "$session_name"
-}
-bindkey -s '^T' '^u tmux_open^M'
-
 zle -N fzf_alias
 bindkey -M emacs '\ea' fzf_alias
-
 
 # Remove commented command from history
 function zshaddhistory() {

@@ -17,18 +17,13 @@ if ! type fd >/dev/null 2>&1; then
   exit 1
 fi
 
-RL_CMD="readlink"
-if [ "$(uname)" == "Darwin" ]; then
-  RL_CMD="greadlink"
-fi
-
 # check if LIST exists
 if [ -n "$LIST" ]; then
   bookmarks=()
   # check if LIST contains any symlink file
   for s in "$LIST"/*; do
     if [ -L "$s" ]; then
-      bookmarks+=( "$($RL_CMD -f "$s")" )
+      bookmarks+=( "$(readlink -f "$s")" )
     fi
   done
 
