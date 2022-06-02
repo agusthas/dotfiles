@@ -72,6 +72,8 @@ DISABLE_MAGIC_FUNCTIONS="true"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git gh fnm fd pass fzf zsh-syntax-highlighting)
 
+export FZF_CTRL_T_COMMAND="fd --type f -IH --exclude .git --exclude node_modules"
+
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
@@ -140,6 +142,7 @@ function fif() {
 
 function fns() {
   local scripts script_name
+  local package_manager
   local run_cmd
 
   if ! cat package.json > /dev/null 2>&1; then echo "fns: Error: No package.json found."; return 1; fi
@@ -148,16 +151,27 @@ function fns() {
   if ! [[ -n "$scripts" ]]; then echo "fns: Error: No scripts found."; return 1; fi
   script_name=$(echo "$scripts" | awk -F ': ' '{gsub(/"/, "", $1); print $1}')
 
+  package_manager=()
+
+  if command -v npm >/dev/null 2>&1; then
+    package_manager+=("npm run")
+  fi
+
   if command -v yarn >/dev/null 2>&1; then
-    run_cmd="yarn"
-  elif command -v npm >/dev/null 2>&1; then
-    run_cmd="npm run"
-  else
-    echo "fns: Error: No package manager found"
-    return 1
+    package_manager+=("yarn")
+  fi
+
+  if command -v pnpm >/dev/null 2>&1; then
+    package_manager+=("pnpm")
   fi
   
-  $run_cmd "$script_name"
+  PS3="Select package manager: "
+
+  select run_cmd in "${package_manager[@]}"; do
+    if [[ -n "$run_cmd" ]]; then break; fi
+  done
+
+  print -z "$run_cmd $script_name "
 }
 
 function fzf_alias() {
