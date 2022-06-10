@@ -186,6 +186,7 @@ function fzf_alias() {
 
 zle -N fzf_alias
 bindkey -M emacs '\ea' fzf_alias
+bindkey -s ^f "tmux-sessionizer\n"
 
 # Remove commented command from history
 function zshaddhistory() {

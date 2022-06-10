@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+# checks if fd command exists
+if ! command -v fd > /dev/null; then
+    echo "fd command not found"
+    exit 1
+fi
+
+if [[ $# -eq 1 ]]; then
+    selected=$1
+else
+    selected=$(fd . ~/workspaces/work ~/workspaces/personal-project 2>/dev/null --max-depth=1 -t d | fzf --height=50% --reverse --prompt="Select a workspace: ")
+fi
+
+if [[ -z $selected ]]; then
+    exit 0
+fi
+
+selected_name=$(basename "$selected" | tr . _)
+tmux_running=$(pgrep tmux)
+
+if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
+    tmux new-session -s $selected_name -c $selected
+    exit 0
+fi
+
+if ! tmux has-session -t=$selected_name 2> /dev/null; then
+    tmux new-session -ds $selected_name -c $selected
+fi
+
+tmux switch-client -t $selected_name
