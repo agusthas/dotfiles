@@ -9,7 +9,8 @@ fi
 if [[ $# -eq 1 ]]; then
     selected=$1
 else
-    selected=$(fd . ~/workspaces/work ~/workspaces/personal-project 2>/dev/null --max-depth=1 -t d | fzf --height=50% --reverse --prompt="Select a workspace: ")
+    # FIXME: hardcoded path
+    selected=$(fd . ~/workspaces/work ~/workspaces/personal-project 2>/dev/null --max-depth=1 -t d | fzf --height=50% --no-info --reverse --prompt="Select a workspace: ")
 fi
 
 if [[ -z $selected ]]; then
