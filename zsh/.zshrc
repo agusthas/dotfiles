@@ -148,7 +148,7 @@ function fns() {
   if ! cat package.json > /dev/null 2>&1; then echo "fns: Error: No package.json found."; return 1; fi
   scripts=$(jq -r '.scripts | to_entries[] | "\"\(.key)\": \"\(.value)\""' package.json | fzf --reverse --height=40%)
 
-  if ! [[ -n "$scripts" ]]; then echo "fns: Error: No scripts found."; return 1; fi
+  if ! [[ -n "$scripts" ]]; then return 0; fi
   script_name=$(echo "$scripts" | awk -F ': ' '{gsub(/"/, "", $1); print $1}')
 
   package_manager=()
