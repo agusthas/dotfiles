@@ -2,7 +2,7 @@
   name = SusuMantan
   email = suzumantan@gmail.com
 [core]
-	editor = code --wait
+  editor = "if which code > /dev/null; then ED='code --wait'; else ED=$EDITOR; fi; $ED"
 	pager = delta
 	excludesFile = ~/.gitignore
 [diff]
