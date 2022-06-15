@@ -109,6 +109,7 @@ alias gunwip='git log -n 1 | grep -q -c "\-\-wip\-\-" && git reset HEAD~1'
 alias getrandom='openssl rand -base64 32'
 alias lg='lazygit'
 alias dco='docker compose'
+alias tms='tmux-sessionizer'
 
 function gmove() {
   local usage="Usage: gmove <new-branch> <ref-branch-name>"
