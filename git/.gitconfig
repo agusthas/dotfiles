@@ -11,10 +11,6 @@
   lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset' --abbrev-commit --date=relative
 [difftool "default-difftool"]
   cmd = code --wait --diff $LOCAL $REMOTE
-[url "git@github.com:"]
-	insteadOf = https://github.com/
-[url "git@gitlab.com:"]
-	insteadOf = https://gitlab.com/
 [delta]
   line-numbers = true
   side-by-side = false
