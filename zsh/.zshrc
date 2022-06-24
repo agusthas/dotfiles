@@ -77,6 +77,17 @@ export FZF_CTRL_T_COMMAND="fd --type f -IH --exclude .git --exclude node_modules
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
+case `uname` in
+  Darwin)
+    export PATH="/usr/local/opt/php@7.4/sbin:/usr/local/opt/php@7.4/bin:$PATH"
+  ;;
+  Linux)
+    # commands for Linux go here
+  ;;
+  FreeBSD)
+    # commands for FreeBSD go here
+  ;;
+esac
 
 # export MANPATH="/usr/local/man:$MANPATH"
 
@@ -112,19 +123,17 @@ alias dco='docker compose'
 alias tms='tmux-sessionizer'
 
 function gmove() {
-  local usage="Usage: gmove <new-branch> <ref-branch-name>"
-  local new_branch="$1"
-  local ref_branch="$2"
-  if [ -z "$new_branch" ] || [ -z "$ref_branch" ]; then
-    echo "$usage"
+  if [ $# -eq 0 ]; then
+    echo "Usage: gmove <new-branch-name>"
     return 1
   fi
   
+  # Stash staged changes and commit the rest as a new WIP commit.
   git stash -- $(git diff --staged --name-only) && gwip
 
-  git branch $1 $2
-  git switch $1
-  git stash pop
+  # switch to a new branch based on the current branch
+  # pop the stash and commit the new branch
+  git switch -c "$1" && git stash pop
 }
 
 function fif() {
