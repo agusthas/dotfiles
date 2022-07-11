@@ -70,9 +70,11 @@ DISABLE_MAGIC_FUNCTIONS="true"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git gh fnm fd pass fzf zsh-syntax-highlighting)
+plugins=(git gh fnm fd pass fzf zsh-syntax-highlighting zsh-autosuggestions)
 
 export FZF_CTRL_T_COMMAND="fd --type f -IH --exclude .git --exclude node_modules"
+
+export ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -113,7 +115,6 @@ fi
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias :q="exit"
-alias clr='clear; echo Currently logged in on $TTY, as $USERNAME in directory $PWD.'
 
 alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
 alias gunwip='git log -n 1 | grep -q -c "\-\-wip\-\-" && git reset HEAD~1'
