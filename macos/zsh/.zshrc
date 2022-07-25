@@ -70,15 +70,13 @@ DISABLE_MAGIC_FUNCTIONS="true"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git gh fnm fd pass fzf zsh-syntax-highlighting zsh-autosuggestions)
+plugins=(git fzf zsh-autosuggestions zsh-syntax-highlighting)
 
 export FZF_CTRL_T_COMMAND="fd --type f -IH --exclude .git --exclude node_modules"
 
 export ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
 source $ZSH/oh-my-zsh.sh
-
-# User configuration
 
 # export MANPATH="/usr/local/man:$MANPATH"
 
@@ -122,20 +120,6 @@ function gmove() {
   # switch to a new branch based on the current branch
   # pop the stash and commit the new branch
   git switch -c "$1" && git stash pop
-}
-
-function fif() {
-  if [ ! "$#" -gt 0 ]; then echo "Usage: fif <search-term>"; return 1; fi
-
-  if ! command -v rg >/dev/null 2>&1; then
-    echo "rg is not installed. Please install ripgrep."
-    return 1
-  fi
-
-  rg --files-with-matches --no-messages "$1" | fzf --no-info \
-    --header '?:toggle-preview' \
-    --preview "rg --ignore-case --pretty --context 5 '$1' {}" \
-    --bind='?:toggle-preview'
 }
 
 function fns() {
@@ -194,35 +178,6 @@ function zshaddhistory() {
     fc -p
   else
     return 1
-  fi
-}
-
-export NNN_PLUG='b:fzf-bookmarks;p:preview;f:quick-find'
-function n() {
-  # Block nesting of nnn in subshells
-  if [ -n $NNNLVL ] && [ "${NNNLVL:-0}" -ge 1 ]; then
-    echo "nnn is already running"
-    return
-  fi
-
-  # The behaviour is set to cd on quit (nnn checks if NNN_TMPFILE is set)
-  # If NNN_TMPFILE is set to a custom path, it must be exported for nnn to
-  # see. To cd on quit only on ^G, remove the "export" and make sure not to
-  # use a custom path, i.e. set NNN_TMPFILE *exactly* as follows:
-  #     NNN_TMPFILE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.lastd"
-  NNN_TMPFILE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.lastd"
-
-  # Unmask ^Q (, ^V etc.) (if required, see `stty -a`) to Quit nnn
-  # stty start undef
-  # stty stop undef
-  # stty lwrap undef
-  # stty lnext undef
-
-  nnn -aQ "$@"
-
-  if [ -f "$NNN_TMPFILE" ]; then
-    . "$NNN_TMPFILE"
-    rm -f "$NNN_TMPFILE" > /dev/null
   fi
 }
 
