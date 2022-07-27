@@ -3,7 +3,6 @@
   email = suzumantan@gmail.com
 [core]
   editor = "if which code > /dev/null; then ED='code --wait'; else ED=$EDITOR; fi; $ED"
-	pager = delta
 	excludesFile = ~/.gitignore
 [diff]
   tool = default-difftool
@@ -11,11 +10,5 @@
   lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset' --abbrev-commit --date=relative
 [difftool "default-difftool"]
   cmd = code --wait --diff $LOCAL $REMOTE
-[delta]
-  line-numbers = true
-  side-by-side = false
-  file-modified-label = modified:
-[interactive]
-  diffFilter = delta --color-only
 [init]
 	defaultBranch = main
