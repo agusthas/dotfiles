@@ -1,5 +1,5 @@
 # If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:$PATH
+export PATH=$HOME/bin:$PATH
 
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
@@ -123,51 +123,21 @@ function gmove() {
 }
 
 function fns() {
-  local scripts script_name
-  local package_manager
-  local run_cmd
+  if [ ! -f package.json ]; then
+    echo "No package.json found in current directory." >&2
+  else
+    local script_name=$(jq '.scripts | keys[]' package.json -r |\
+      fzf-tmux --reverse \
+      --height=50% \
+      --prompt="Select a script to run: " \
+      --preview="jq '.scripts.\"{}\"' package.json -r")
 
-  if ! cat package.json > /dev/null 2>&1; then echo "fns: Error: No package.json found."; return 1; fi
-  scripts=$(jq -r '.scripts | to_entries[] | "\"\(.key)\": \"\(.value)\""' package.json | fzf --reverse --height=40%)
-
-  if ! [[ -n "$scripts" ]]; then return 0; fi
-  script_name=$(echo "$scripts" | awk -F ': ' '{gsub(/"/, "", $1); print $1}')
-
-  package_manager=()
-
-  if command -v npm >/dev/null 2>&1; then
-    package_manager+=("npm run")
-  fi
-
-  if command -v yarn >/dev/null 2>&1; then
-    package_manager+=("yarn")
-  fi
-
-  if command -v pnpm >/dev/null 2>&1; then
-    package_manager+=("pnpm")
-  fi
-  
-  PS3="Select package manager: "
-
-  select run_cmd in "${package_manager[@]}"; do
-    if [[ -n "$run_cmd" ]]; then break; fi
-  done
-
-  print -z "$run_cmd $script_name "
-}
-
-function fzf_alias() {
-  local selection=$(alias | fzf --query="$BUFFER" | sed -re 's/=.+$/ /')
-
-  if [[ -n "$selection" ]]; then
-    LBUFFER="$selection"
-
-    zle reset-prompt
+    if [ -n "$script_name" ]; then
+      eval "npm run $script_name"
+    fi
   fi
 }
 
-zle -N fzf_alias
-bindkey -M emacs '\ea' fzf_alias
 bindkey -s ^f "tmux-sessionizer\n"
 
 # Remove commented command from history
