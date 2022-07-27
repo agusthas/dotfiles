@@ -96,3 +96,6 @@ if has('gui_running')
 else
   set background=dark
 endif
+
+" Remap
+vnoremap :s :s/\%V\%V/<Left><Left><Left><Left>
