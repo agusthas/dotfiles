@@ -1,5 +1,6 @@
 # If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:$PATH
+typeset -U path
+path=($HOME/bin $path)
 
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
@@ -70,15 +71,13 @@ DISABLE_MAGIC_FUNCTIONS="true"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git gh fnm fd pass fzf zsh-syntax-highlighting zsh-autosuggestions)
+plugins=(git fzf zsh-autosuggestions zsh-syntax-highlighting)
 
 export FZF_CTRL_T_COMMAND="fd --type f -IH --exclude .git --exclude node_modules"
 
 export ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
 source $ZSH/oh-my-zsh.sh
-
-# User configuration
 
 # export MANPATH="/usr/local/man:$MANPATH"
 
@@ -124,66 +123,22 @@ function gmove() {
   git switch -c "$1" && git stash pop
 }
 
-function fif() {
-  if [ ! "$#" -gt 0 ]; then echo "Usage: fif <search-term>"; return 1; fi
-
-  if ! command -v rg >/dev/null 2>&1; then
-    echo "rg is not installed. Please install ripgrep."
-    return 1
-  fi
-
-  rg --files-with-matches --no-messages "$1" | fzf --no-info \
-    --header '?:toggle-preview' \
-    --preview "rg --ignore-case --pretty --context 5 '$1' {}" \
-    --bind='?:toggle-preview'
-}
-
 function fns() {
-  local scripts script_name
-  local package_manager
-  local run_cmd
+  if [ ! -f package.json ]; then
+    echo "No package.json found in current directory." >&2
+  else
+    local script_name=$(jq '.scripts | keys[]' package.json -r |\
+      fzf-tmux --reverse \
+      --height=50% \
+      --prompt="Select a script to run: " \
+      --preview="jq '.scripts.\"{}\"' package.json -r")
 
-  if ! cat package.json > /dev/null 2>&1; then echo "fns: Error: No package.json found."; return 1; fi
-  scripts=$(jq -r '.scripts | to_entries[] | "\"\(.key)\": \"\(.value)\""' package.json | fzf --reverse --height=40%)
-
-  if ! [[ -n "$scripts" ]]; then return 0; fi
-  script_name=$(echo "$scripts" | awk -F ': ' '{gsub(/"/, "", $1); print $1}')
-
-  package_manager=()
-
-  if command -v npm >/dev/null 2>&1; then
-    package_manager+=("npm run")
-  fi
-
-  if command -v yarn >/dev/null 2>&1; then
-    package_manager+=("yarn")
-  fi
-
-  if command -v pnpm >/dev/null 2>&1; then
-    package_manager+=("pnpm")
-  fi
-  
-  PS3="Select package manager: "
-
-  select run_cmd in "${package_manager[@]}"; do
-    if [[ -n "$run_cmd" ]]; then break; fi
-  done
-
-  print -z "$run_cmd $script_name "
-}
-
-function fzf_alias() {
-  local selection=$(alias | fzf --query="$BUFFER" | sed -re 's/=.+$/ /')
-
-  if [[ -n "$selection" ]]; then
-    LBUFFER="$selection"
-
-    zle reset-prompt
+    if [ -n "$script_name" ]; then
+      eval "npm run $script_name"
+    fi
   fi
 }
 
-zle -N fzf_alias
-bindkey -M emacs '\ea' fzf_alias
 bindkey -s ^f "tmux-sessionizer\n"
 
 # Remove commented command from history
@@ -197,34 +152,17 @@ function zshaddhistory() {
   fi
 }
 
-export NNN_PLUG='b:fzf-bookmarks;p:preview;f:quick-find'
-function n() {
-  # Block nesting of nnn in subshells
-  if [ -n $NNNLVL ] && [ "${NNNLVL:-0}" -ge 1 ]; then
-    echo "nnn is already running"
-    return
-  fi
-
-  # The behaviour is set to cd on quit (nnn checks if NNN_TMPFILE is set)
-  # If NNN_TMPFILE is set to a custom path, it must be exported for nnn to
-  # see. To cd on quit only on ^G, remove the "export" and make sure not to
-  # use a custom path, i.e. set NNN_TMPFILE *exactly* as follows:
-  #     NNN_TMPFILE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.lastd"
-  NNN_TMPFILE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.lastd"
-
-  # Unmask ^Q (, ^V etc.) (if required, see `stty -a`) to Quit nnn
-  # stty start undef
-  # stty stop undef
-  # stty lwrap undef
-  # stty lnext undef
-
-  nnn -aQ "$@"
-
-  if [ -f "$NNN_TMPFILE" ]; then
-    . "$NNN_TMPFILE"
-    rm -f "$NNN_TMPFILE" > /dev/null
-  fi
-}
+case `uname` in
+  Darwin)
+    # commands for OS X go here
+  ;;
+  Linux)
+    path=($HOME/.fnm $path)
+  ;;
+  FreeBSD)
+    # commands for FreeBSD go here
+  ;;
+esac
 
 # fnm
 eval "$(fnm env --use-on-cd)"
