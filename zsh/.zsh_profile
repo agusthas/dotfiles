@@ -1,0 +1,94 @@
+## -- PATHS --
+typeset -U path
+path=($HOME/bin $path)
+
+case `uname` in
+  Darwin)
+    # commands for OS X go here
+  ;;
+  Linux)
+    path=($HOME/.fnm $path)
+  ;;
+  FreeBSD)
+    # commands for FreeBSD go here
+  ;;
+esac
+
+## -- ALIASES --
+alias :q="exit"
+alias getrandom='openssl rand -base64 32'
+alias lg='lazygit'
+alias dco='docker compose'
+
+## -- FUNCTIONS --
+function gmove() {
+  if [ $# -eq 0 ]; then
+    echo "Usage: gmove <new-branch-name>"
+    return 1
+  fi
+  
+  # Stash staged changes and commit the rest as a new WIP commit.
+  git stash -- $(git diff --staged --name-only) && gwip
+
+  # switch to a new branch based on the current branch
+  # pop the stash and commit the new branch
+  git switch -c "$1" && git stash pop
+}
+
+function fns() {
+  if [ ! -f package.json ]; then
+    echo "No package.json found in current directory." >&2
+  else
+    local script_name=$(jq '.scripts | keys[]' package.json -r |\
+      fzf-tmux --reverse \
+      --height=50% \
+      --prompt="Select a script to run: " \
+      --preview="jq '.scripts.\"{}\"' package.json -r")
+
+    if [ -n "$script_name" ]; then
+      eval "npm run $script_name"
+    fi
+  fi
+}
+
+function tms() {
+  local selected
+  local selected_name
+
+  if ! command -v fd > /dev/null; then
+    echo "fd not found. Please install fd." >&2
+  else
+    if [[ $# -eq 1 ]]; then
+      selected="$1" && [[ "$selected" == "." ]] && selected="$(pwd)"
+    else
+      selected=$(fd . ~/sandbox ~/workspaces/work ~/workspaces/frontend-mentor ~/workspaces/personal-project 2>/dev/null --max-depth=1 -t d | fzf --height=50% --no-info --reverse --prompt="Select a workspace: ")
+    fi
+
+    if [[ -z "$selected" ]]; then
+      return 0
+    fi
+
+    selected_name=$(basename "$selected" | tr . _)
+
+    if [[ -n "$TMUX" ]]; then
+      tmux switch-client -t "$selected_name" 2>/dev/null \
+        || (tmux new-session -ds "$selected_name" -c "$selected" && tmux switch-client -t "$selected_name")
+    elif [[ -z "$TMUX" ]]; then
+      tmux new-session -s "$selected_name" -c "$selected" \
+        || tmux attach -t "$selected_name"
+    fi
+  fi
+}
+
+# Remove commented command from history
+function zshaddhistory() {
+  emulate -L zsh
+  if ! [[ "$1" =~ "(^#\s+|^\s+#|^ |^clear)" ]] ; then
+    print -sr -- "${1%%$'\n'}"
+    fc -p
+  else
+    return 1
+  fi
+}
+
+bindkey -s ^f 'tms\n'
