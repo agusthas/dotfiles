@@ -1,6 +1,6 @@
 ## -- PATHS --
 typeset -U path
-path=($HOME/bin $path)
+path+=($HOME/bin)
 
 case `uname` in
   Darwin)

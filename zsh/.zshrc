@@ -1,7 +1,3 @@
-# If you come from bash you might have to change your $PATH.
-typeset -U path
-path=($HOME/bin $path)
-
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
