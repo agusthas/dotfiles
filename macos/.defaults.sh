@@ -3,7 +3,7 @@
 #defaults write -g KeyRepeat -int 1
 
 # Finder: allow quiting via ⌘ + Q; doing so will also hide desktop icons
-defaults write com.apple.finder QuitMenuItem -bool true
+# defaults write com.apple.finder QuitMenuItem -bool true
 
 # Finder: show all filename extensions in Finder
 defaults write -g AppleShowAllExtensions -bool true
