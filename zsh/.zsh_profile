@@ -21,16 +21,48 @@ alias lg='lazygit'
 alias dco='docker compose'
 
 ## -- FUNCTIONS --
+function __get_fzf_instance() {
+  fzf-tmux \
+    --reverse \
+    --bind="ctrl-d:preview-down,ctrl-u:preview-up" \
+    --preview-window=wrap \
+    --preview="bat --color=always --plain {} 2>/dev/null || exa -1 --group-directories-first --color=always {}" \
+    "$@"
+}
+
+function __find_workspace_path() {
+  local folder_paths=(
+    "$HOME"
+    "$HOME/sandbox"
+    "$HOME/workspaces/personal"
+    "$HOME/workspaces/work"
+  )
+  local folder_path=$(fd . $(echo ${folder_paths[@]}) --max-depth=1 -t d | __get_fzf_instance --no-info --prompt="Select a workspace: " --preview="")
+  
+  if [ -n "$folder_path" ]; then
+    echo "$folder_path"
+  fi
+}
+
+function f() {
+  local workspace_path=$(__find_workspace_path)
+  local selected
+
+  if [ -n "$workspace_path" ]; then
+    selected=$(fd . $workspace_path | __get_fzf_instance --prompt="Select a file: ")
+
+    if [ -n "$selected" ]; then
+      $EDITOR $selected
+    fi
+  fi
+}
+
 function fns() {
   if [ ! -f package.json ]; then
     echo "No package.json found in current directory." >&2
   else
     local script_name=$(jq '.scripts | keys[]' package.json -r \
-    | fzf-tmux --reverse \
-      --height=50% \
-      --prompt="Select a script to run: " \
-      --preview-window=wrap \
-      --preview="jq '.scripts.\"{}\"' package.json -r")
+    | __get_fzf_instance --height=50% --prompt="Select a script to run: " --preview="jq '.scripts.\"{}\"' package.json -r")
 
     if [ -n "$script_name" ]; then
       npm run $(echo "$script_name")
@@ -41,18 +73,11 @@ function fns() {
 function tms() {
   local selected
   local selected_name
-  local folder_paths=(
-    "$HOME"
-    "$HOME/sandbox"
-    "$HOME/workspaces/personal"
-    "$HOME/workspaces/work"
-  )
 
   if [[ $# -eq 1 ]]; then
     selected="$1" && [[ "$selected" == "." ]] && selected="$(pwd)"
   else
-    selected=$(fd . $(echo ${folder_paths[@]}) --max-depth=1 -t d \
-      | fzf-tmux --height=50% --no-info --reverse --prompt="Select a workspace: ")
+    selected=$(__find_workspace_path)
   fi
 
   if [[ -z "$selected" ]]; then
