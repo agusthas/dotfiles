@@ -8,9 +8,12 @@ printf "\n"
 #  install_from_github <command-name> <repo-short-url>
 #
 # Example:
-#  install_from_github fd sharkdp/fd
+#  install_from_github fd sharkdp/fd force
 install_from_github() {
-  if ! command -v $1 > /dev/null; then
+  local is_force="$3"
+  local is_command_exists="$(command -v "$1" 2>/dev/null)"
+
+  if [[ ! -n "$is_command_exists" ]] || [[ -n "$is_force" ]]; then
     local tmp="/tmp/.github-install"
     local binpath="$HOME/bin"
 
@@ -62,7 +65,7 @@ install_from_github() {
     echo "Success!"
     echo "Saved in: $target"
   else
-    echo "$1 is already installed"
+    echo "Command '$1' already exists."
   fi
 }
 
@@ -125,7 +128,7 @@ case "$OS" in
     install_from_github bat sharkdp/bat
     ;;
   'Darwin')
-    brew install fd fnm neovim exa
+    brew install bat fd fnm neovim exa
     ;;
   *)
     echo "Unsupported OS"

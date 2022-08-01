@@ -12,3 +12,4 @@ stow_dotfiles zsh
 stow_dotfiles p10k
 stow_dotfiles git
 stow_dotfiles nvim
+stow_dotfiles tmux
