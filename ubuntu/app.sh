@@ -112,6 +112,7 @@ if [ -d "$FZF_DIR" ]; then
 else
   git clone --depth 1 https://github.com/junegunn/fzf.git "$FZF_DIR"
 fi
+"$FZF_DIR/install" --bin
 
 # START FROM HERE (PLATFORM SPECIFIC)
 OS="$(uname -s)"
