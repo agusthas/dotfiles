@@ -55,29 +55,31 @@ function fns() {
 function tms() {
   local selected
   local selected_name
+  local folder_paths=(
+    "$HOME"
+    "$HOME/sandbox"
+    "$HOME/workspaces/personal"
+    "$HOME/workspaces/work"
+  )
 
-  if ! command -v fd > /dev/null; then
-    echo "fd not found. Please install fd." >&2
+  if [[ $# -eq 1 ]]; then
+    selected="$1" && [[ "$selected" == "." ]] && selected="$(pwd)"
   else
-    if [[ $# -eq 1 ]]; then
-      selected="$1" && [[ "$selected" == "." ]] && selected="$(pwd)"
-    else
-      selected=$(fd . ~/sandbox ~/workspaces/work ~/workspaces/frontend-mentor ~/workspaces/personal-project 2>/dev/null --max-depth=1 -t d | fzf --height=50% --no-info --reverse --prompt="Select a workspace: ")
-    fi
+    selected=$(fd . $(echo ${folder_paths[@]}) --max-depth=1 -t d | fzf-tmux --height=50% --no-info --reverse --prompt="Select a workspace: ")
+  fi
 
-    if [[ -z "$selected" ]]; then
-      return 0
-    fi
+  if [[ -z "$selected" ]]; then
+    return 0
+  fi
 
-    selected_name=$(basename "$selected" | tr . _)
+  selected_name=$(basename "$selected" | tr . _)
 
-    if [[ -n "$TMUX" ]]; then
-      tmux switch-client -t "$selected_name" 2>/dev/null \
-        || (tmux new-session -ds "$selected_name" -c "$selected" && tmux switch-client -t "$selected_name")
-    elif [[ -z "$TMUX" ]]; then
-      tmux new-session -s "$selected_name" -c "$selected" \
-        || tmux attach -t "$selected_name"
-    fi
+  if [[ -n "$TMUX" ]]; then
+    tmux switch-client -t "$selected_name" 2>/dev/null \
+      || (tmux new-session -ds "$selected_name" -c "$selected" && tmux switch-client -t "$selected_name")
+  elif [[ -z "$TMUX" ]]; then
+    tmux new-session -s "$selected_name" -c "$selected" \
+      || tmux attach -t "$selected_name"
   fi
 }
 
