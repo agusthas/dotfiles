@@ -122,6 +122,7 @@ case "$OS" in
     install_from_github fnm Schniz/fnm
     install_from_github nvim neovim/neovim
     install_from_github exa ogham/exa
+    install_from_github bat sharkdp/bat
     ;;
   'Darwin')
     brew install fd fnm neovim exa
