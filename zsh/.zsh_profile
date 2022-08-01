@@ -43,10 +43,11 @@ function fns() {
       fzf-tmux --reverse \
       --height=50% \
       --prompt="Select a script to run: " \
+      --preview-window=wrap \
       --preview="jq '.scripts.\"{}\"' package.json -r")
 
     if [ -n "$script_name" ]; then
-      eval "npm run $script_name"
+      npm run $(echo "$script_name")
     fi
   fi
 }
