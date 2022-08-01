@@ -21,26 +21,12 @@ alias lg='lazygit'
 alias dco='docker compose'
 
 ## -- FUNCTIONS --
-function gmove() {
-  if [ $# -eq 0 ]; then
-    echo "Usage: gmove <new-branch-name>"
-    return 1
-  fi
-  
-  # Stash staged changes and commit the rest as a new WIP commit.
-  git stash -- $(git diff --staged --name-only) && gwip
-
-  # switch to a new branch based on the current branch
-  # pop the stash and commit the new branch
-  git switch -c "$1" && git stash pop
-}
-
 function fns() {
   if [ ! -f package.json ]; then
     echo "No package.json found in current directory." >&2
   else
-    local script_name=$(jq '.scripts | keys[]' package.json -r |\
-      fzf-tmux --reverse \
+    local script_name=$(jq '.scripts | keys[]' package.json -r \
+    | fzf-tmux --reverse \
       --height=50% \
       --prompt="Select a script to run: " \
       --preview-window=wrap \
@@ -65,7 +51,8 @@ function tms() {
   if [[ $# -eq 1 ]]; then
     selected="$1" && [[ "$selected" == "." ]] && selected="$(pwd)"
   else
-    selected=$(fd . $(echo ${folder_paths[@]}) --max-depth=1 -t d | fzf-tmux --height=50% --no-info --reverse --prompt="Select a workspace: ")
+    selected=$(fd . $(echo ${folder_paths[@]}) --max-depth=1 -t d \
+      | fzf-tmux --height=50% --no-info --reverse --prompt="Select a workspace: ")
   fi
 
   if [[ -z "$selected" ]]; then
