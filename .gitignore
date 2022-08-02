@@ -34,3 +34,7 @@ Temporary Items
 
 ### Homebrew ###
 Brewfile.lock.json
+
+### Dev ###
+Dockerfile
+.dockerignore

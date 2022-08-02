@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+
+usage() {
+  echo "Usage:"
+  echo "  [APP_BIN_DIR] $0 [-c <command-name>] <repo-short-url>"
+  echo "Environment variables:"
+  echo "  APP_BIN_DIR: directory to install the app to"
+  echo "Example:"
+  echo "  $0 sharkdp/fd"
+  echo "  $0 -c fd sharkdp/fd"
+  echo "  APP_BIN_DIR=\$HOME/bin $0 sharkdp/fd"
+}
+
+cmd=""
+app_bin_dir="${APP_BIN_DIR:-$HOME/bin}"
+
+while getopts ":c:h:" o; do
+  case "$o" in
+    c) cmd="${OPTARG}";;
+    h) usage >&2; exit 1;;
+  esac
+done
+shift $((OPTIND-1))
+
+
+if [[ $# -eq 0 ]]; then
+  usage >&2
+  exit 1
+fi
+
+repo="$1"
+if [[ ! -n "$cmd" ]]; then
+  cmd="$(basename $repo)"
+fi
+
+tmp="/tmp/.github-install"
+url="https://api.github.com/repos/$repo/releases/latest"
+rm -rf $tmp
+mkdir -p $tmp
+release_name=$(http "$url" \
+  | jq -r '.assets[].name' \
+  | gum filter --prompt="Select a release: " --indicator=">>" --placeholder "") || exit 1
+
+echo "$(gum style --foreground 5 -- "Releases: $release_name")"
+browser_download_url=$(http "$url" \
+  | jq -r --arg release_name "$release_name" '.assets[] | select(.name == $release_name) | .browser_download_url'
+)
+
+echo "$(gum style --foreground 5 -- "Download URL: $browser_download_url")"
+pushd $tmp >/dev/null
+
+printf "\n"
+
+http -b --timeout 5 --download "$browser_download_url"
+
+if [ -f "$release_name" ]; then
+  case $release_name in
+    *.tar.bz2)  tar xjf $release_name      ;;
+    *.tar.gz)   tar xzf $release_name      ;;
+    *.tar.xz)   tar xzf $release_name      ;;
+    *.bz2)      bunzip2 $release_name      ;;
+    *.gz)       gunzip $release_name       ;;
+    *.tar)      tar xf $release_name       ;;
+    *.tbz2)     tar xjf $release_name      ;;
+    *.tgz)      tar xzf $release_name      ;;
+    *.zip)      unzip $release_name        ;;
+    *.Z)        uncompress $release_name   ;;
+    *.rar)      rar x $release_name        ;;  # 'rar' must to be installed
+    *.jar)      jar -xvf $release_name     ;;  # 'jdk' must to be installed
+    *)          echo "'$release_name' cannot be extracted via extract()" ;;
+  esac
+fi
+
+bin=$(find . -type f | gum filter --prompt="Select the executable: " --indicator=">>" --placeholder "")
+popd
+
+if [[ -n "$bin" ]]; then
+  basename=$(basename $bin)
+  alias=$(gum input --prompt="Choose an alias (empty to leave: $basename): " --placeholder="$basename")
+  target="$app_bin_dir/${alias:-$basename}"
+  mv $tmp/$bin $target
+  chmod +x "$target"
+  echo "Success! Saved in: $target"
+else
+  echo "$(gum style --foreground 196 -- 'No binary found.')"
+fi
