@@ -4,7 +4,7 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 apt_packages="zsh zip unzip curl wget stow jq tmux git httpie"
 
-brew_packages="git httpie tmux curl jq"
+brew_packages="git httpie tmux jq"
 
 case "$(uname -s)" in
   'Linux')
