@@ -2,7 +2,6 @@
 
 YES="Yes"
 NO="No"
-PATH=$PATH:$HOME/bin
 APP_BIN_DIR=${APP_BIN_DIR:-$HOME/bin}
 
 __log() {
@@ -10,73 +9,25 @@ __log() {
 }
 
 __info() {
-  echo -e "$(gum style --foreground 111 -- "$1")"
+  echo -e "[INFO] $1"
 }
 
 __completed() {
-  echo -e "$(gum style --foreground 212 -- "[✓] $1")"
+  echo -e "[✓] $1"
 }
 
 __error() {
-  echo -e "$(gum style --foreground 196 -- "$1")"
+  echo -e "[ERROR] $1"
 }
 
-__spinner() {
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      -s) shift; spinner="$1";;
-      -t) shift; title="$1";;
-      -c) shift; cmd="$1";;
-      *) break;;
-    esac
-    shift
-  done
-
-  gum spin -s "${spinner:-line}" --title "${title:-"Doing Something..."}" -- "${cmd:-$@}"
+__warn() {
+  echo -e "[WARN] $1"
 }
-
-
-USAGE() {
-  cat <<EOF
-$(gum style --foreground 3 -- "USAGE:"):
-  $0 [options]
-
-$(gum style --foreground 3 -- "OPTIONS:"):
-  $(__info '-h, --help')
-      Show this help message and exit.
-
-  $(__info '--skip-binaries')
-      Skip installing binaries.
-EOF
-}
-
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    -h|--help)
-      USAGE >&2
-      exit 0
-      ;;
-    --skip-binaries)
-      skip_binaries="$YES"
-      shift
-      ;;
-  esac
-  shift
-done
-
-gum style \
-  --border normal \
-  --margin "1 2" \
-  --padding "1 2" \
-  --align center \
-  --border-foreground 212 \
-  "$(gum style --bold 'Application Script Installer')" "" "[Linux | MacOS]"
-
 
 # START FROM HERE (PLATFORM SPECIFIC)
 if [[ -z "$skip_binaries" ]]; then
   __log "Skip installing binaries?"
-  skip_binaries=$(gum choose $YES $NO --cursor "[✓] ") || exit 1
+  skip_binaries=$(echo -e "$YES\n$NO" | fzf --height 30 --reverse --no-info) || exit 1
   __info "$skip_binaries\n"
 fi
 
@@ -103,47 +54,35 @@ fi
 # UNIVERSAL
 __log "UNIVERSAL"
 
+__completed "oh-my-zsh"
 OMZ_DIR="$HOME/.oh-my-zsh"
 if [[ ! -d "$OMZ_DIR" ]]; then
-  __spinner -t "Cloning..." git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git "$OMZ_DIR"
+  git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git "$OMZ_DIR"
+else
+  echo "Already up to date."
 fi
-__completed "oh-my-zsh"
 
+__completed "p10k"
 omz_custom_dir="${ZSH_CUSTOM:-$OMZ_DIR/custom}"
-## p10k
 P10K_DIR="$omz_custom_dir/themes/powerlevel10k"
 if [ -d "$P10K_DIR" ]; then
-  __spinner -t "Updating..." git -C "$P10K_DIR" pull --rebase --force
+  git -C "$P10K_DIR" pull --rebase --force
 else
-  __spinner -t "Cloning..." git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_DIR"
+  git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_DIR"
 fi
-__completed "p10k"
 
-## zsh-autosuggestions
+__completed "zsh-autosuggestions"
 ZSH_AUTOSUGGESTIONS_DIR="$omz_custom_dir/plugins/zsh-autosuggestions"
 if [ -d "$ZSH_AUTOSUGGESTIONS_DIR" ]; then
-  __spinner -t "Updating..." git -C "$ZSH_AUTOSUGGESTIONS_DIR" pull --rebase --force
+  git -C "$ZSH_AUTOSUGGESTIONS_DIR" pull --rebase --force
 else
-  __spinner -t "Cloning..." git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions "$ZSH_AUTOSUGGESTIONS_DIR"
+  git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions "$ZSH_AUTOSUGGESTIONS_DIR"
 fi
-__completed "zsh-autosuggestions"
 
-## zsh-syntax-highlighting
+__completed "zsh-syntax-highlighting"
 ZSH_SYNTAX_HIGHLIGHTING_DIR="$omz_custom_dir/plugins/zsh-syntax-highlighting"
 if [ -d "$ZSH_SYNTAX_HIGHLIGHTING_DIR" ]; then
-  __spinner -t "Updating..." git -C "$ZSH_SYNTAX_HIGHLIGHTING_DIR" pull --rebase --force
+  git -C "$ZSH_SYNTAX_HIGHLIGHTING_DIR" pull --rebase --force
 else
-  __spinner -t "Cloning..." git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_SYNTAX_HIGHLIGHTING_DIR"
+  git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_SYNTAX_HIGHLIGHTING_DIR"
 fi
-__completed "zsh-syntax-highlighting"
-
-## fzf
-FZF_DIR="$HOME/.fzf"
-if [ -d "$FZF_DIR" ]; then
-  __spinner -t "Updating..." git -C "$FZF_DIR" pull --rebase --force
-else
-  __spinner -t "Cloning..." git clone --depth 1 https://github.com/junegunn/fzf.git "$FZF_DIR"
-fi
-__completed "fzf"
-
-__spinner "$FZF_DIR/install" --bin

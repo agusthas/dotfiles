@@ -12,16 +12,16 @@ usage() {
 }
 
 cmd=""
-app_bin_dir="${APP_BIN_DIR:-$HOME/bin}"
+app_bin_dir=${APP_BIN_DIR:-$HOME/bin}
+tmp_file="$(mktemp)"
 
-while getopts ":c:h:" o; do
+while getopts ":c:h:s:" o; do
   case "$o" in
     c) cmd="${OPTARG}";;
     h) usage >&2; exit 1;;
   esac
 done
 shift $((OPTIND-1))
-
 
 if [[ $# -eq 0 ]]; then
   usage >&2
@@ -33,22 +33,27 @@ if [[ ! -n "$cmd" ]]; then
   cmd="$(basename $repo)"
 fi
 
+
 tmp="/tmp/.github-install"
 url="https://api.github.com/repos/$repo/releases/latest"
 rm -rf $tmp
 mkdir -p $tmp
-release_name=$(http "$url" \
-  | jq -r '.assets[].name' \
-  | gum filter --prompt="Select a release: " --indicator=">>" --placeholder "") || exit 1
 
-echo "$(gum style --foreground 5 -- "Releases: $release_name")"
-browser_download_url=$(http "$url" \
-  | jq -r --arg release_name "$release_name" '.assets[] | select(.name == $release_name) | .browser_download_url'
-)
+echo "Repository: $repo"
+echo "Command: $cmd"
+echo "URL: $url"
 
-echo "$(gum style --foreground 5 -- "Download URL: $browser_download_url")"
+http -b "$url" > $tmp_file
+
+release_name=$(cat "$tmp_file" | jq -r '.assets[].name' | fzf --query "$(uname -s | tr '[:upper:]' '[:lower:]')" --height=50% --reverse --no-info --prompt="Select a release: ") || exit 1
+
+browser_download_url=$(cat "$tmp_file" | jq -r --arg release_name "$release_name" '.assets[] | select(.name == $release_name) | .browser_download_url')
+
+rm -rf $tmp_file
+
+echo "Download URL: $browser_download_url"
+
 pushd $tmp >/dev/null
-
 printf "\n"
 
 http -b --timeout 5 --download "$browser_download_url"
@@ -71,16 +76,18 @@ if [ -f "$release_name" ]; then
   esac
 fi
 
-bin=$(find . -type f | gum filter --prompt="Select the executable: " --indicator=">>" --placeholder "")
+bin=$(find . -type f | fzf --query "/$cmd\$" --height 50% --reverse \
+  --prompt="Select the executable: " \
+  --no-info) || exit 1
 popd
 
 if [[ -n "$bin" ]]; then
   basename=$(basename $bin)
-  alias=$(gum input --prompt="Choose an alias (empty to leave: $basename): " --placeholder="$basename")
+  read -p "Choose an alias (empty to leave: $basename): " alias
   target="$app_bin_dir/${alias:-$basename}"
-  mv $tmp/$bin $target
+  mv "$tmp/$bin" "$target"
   chmod +x "$target"
   echo "Success! Saved in: $target"
 else
-  echo "$(gum style --foreground 196 -- 'No binary found.')"
+  echo "No executable found" 2>&1
 fi

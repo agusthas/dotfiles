@@ -2,12 +2,13 @@
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-apt_packages="zsh zip unzip curl wget stow jq tmux git gum httpie"
+apt_packages="zsh zip unzip curl wget stow jq tmux git httpie"
 
 brew_packages="git httpie tmux curl jq"
 
 case "$(uname -s)" in
   'Linux')
+    echo "======= LINUX ======="
     echo "Escalated permission are required to install base packages"
     if ! sudo -v; then
       exit 1
@@ -19,10 +20,10 @@ case "$(uname -s)" in
       sudo add-apt-repository ppa:git-core/ppa
     fi
 
-    if [[ ! -f "/etc/apt/sources.list.d/charm.list" ]]; then
-      echo "Installing Charm PPA..."
-      sudo echo 'deb [trusted=yes] https://repo.charm.sh/apt/ /' > /etc/apt/sources.list.d/charm.list
-    fi
+    # if [[ ! -f "/etc/apt/sources.list.d/charm.list" ]]; then
+    #   echo "Installing Charm PPA..."
+    #   sudo echo 'deb [trusted=yes] https://repo.charm.sh/apt/ /' > /etc/apt/sources.list.d/charm.list
+    # fi
 
     if [[ ! -f "/etc/apt/sources.list.d/httpie.list" ]]; then
       echo "Installing Httpie PPA..."
@@ -44,6 +45,7 @@ case "$(uname -s)" in
       fi
     ;;
   'Darwin')
+    echo "======= MAC ======="
     brew install ${brew_packages}
     ;;
   *)
@@ -52,9 +54,18 @@ case "$(uname -s)" in
     ;;
 esac
 
+FZF_DIR="$HOME/.fzf"
+if [[ ! -d "$FZF_DIR" ]]; then
+  git clone --depth 1 https://github.com/junegunn/fzf.git "$FZF_DIR"
+else
+  git -C "$FZF_DIR" pull --rebase --force
+fi
+"$FZF_DIR/install" --bin
+
 clear
-/usr/bin/env bash -c "$SCRIPT_DIR/dotfiles.sh"; clear
-/usr/bin/env bash -c "$SCRIPT_DIR/app.sh"; clear
+export PATH="$PATH:$HOME/.fzf"
+/usr/bin/env bash -c "$SCRIPT_DIR/dotfiles.sh"
+/usr/bin/env bash -c "$SCRIPT_DIR/app.sh"
 
 echo "[install.sh] Done!"
 
