@@ -14,6 +14,13 @@ case `uname` in
   ;;
 esac
 
+# Preferred editor
+if command -v nvim >/dev/null 2>&1; then
+  export EDITOR='nvim'
+else 
+  export EDITOR='vim'
+fi
+
 ## -- ALIASES --
 alias :q="exit"
 alias getrandom='openssl rand -base64 32'
