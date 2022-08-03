@@ -8,6 +8,7 @@ case `uname` in
   ;;
   Linux)
     # path=($HOME/.fnm $path)
+    export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
   ;;
   FreeBSD)
     # commands for FreeBSD go here

@@ -38,3 +38,7 @@ Brewfile.lock.json
 ### Dev ###
 Dockerfile
 .dockerignore
+
+### ####
+ssh/.config/systemd/**/*
+!ssh/.config/systemd/user
