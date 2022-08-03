@@ -37,7 +37,7 @@ function __find_workspace_path() {
     "$HOME/workspaces/personal"
     "$HOME/workspaces/work"
   )
-  local folder_path=$(fd . $(echo ${folder_paths[@]}) --max-depth=1 -t d | __get_fzf_instance --no-info --prompt="Select a workspace: " --preview="")
+  local folder_path=$(fd . $(echo ${folder_paths[@]}) --max-depth=1 -t d | __get_fzf_instance --height=50% --no-info --prompt="Select a workspace: " --preview="")
   
   if [ -n "$folder_path" ]; then
     echo "$folder_path"
@@ -98,7 +98,7 @@ function tms() {
 # Remove commented command from history
 function zshaddhistory() {
   emulate -L zsh
-  if ! [[ "$1" =~ "(^#\s+|^\s+#|^ |^clear)" ]] ; then
+  if ! [[ "$1" =~ "(^ |^clear)" ]] ; then
     print -sr -- "${1%%$'\n'}"
     fc -p
   else
@@ -106,4 +106,5 @@ function zshaddhistory() {
   fi
 }
 
+bindkey '^[#' pound-insert
 bindkey -s ^f 'tms\n'
