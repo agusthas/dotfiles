@@ -10,7 +10,7 @@ stow_dotfiles zsh p10k git nvim tmux bin
 
 case "$(uname -s)" in
   'Linux')
-    stow_dotfiles ssh
+    # stow_dotfiles ssh
     ;;
   'Darwin')
     ;;
