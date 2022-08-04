@@ -1,6 +1,3 @@
-require('bootstrap')
-require('deps')
-
 -- Leader key -> " "
 --
 -- In general, it's a good idea to set this early in your config, because otherwise
@@ -8,6 +5,9 @@ require('deps')
 -- leader.
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
+
+require('bootstrap')
+require('deps')
 
 vim.g.solarized_termcolors = 256
 vim.o.background = 'dark'

@@ -30,6 +30,9 @@ return require('packer').startup {
     use "tpope/vim-commentary"
     use "tpope/vim-surround"
     use "junegunn/vim-easy-align"
+
+    -- Statusline
+    use { "nvim-lualine/lualine.nvim", config = function() require('lualine').setup() end }
   end,
 
   config = {
