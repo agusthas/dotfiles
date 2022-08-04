@@ -2,22 +2,13 @@
   name = SusuMantan
   email = suzumantan@gmail.com
 [core]
-	editor = code --wait
-	pager = delta
-	excludesFile = /home/susumantan/.gitignore
+  editor = "if which code > /dev/null; then ED='code --wait'; else ED=$EDITOR; fi; $ED"
+	excludesFile = ~/.gitignore
 [diff]
   tool = default-difftool
 [alias]
   lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset' --abbrev-commit --date=relative
 [difftool "default-difftool"]
   cmd = code --wait --diff $LOCAL $REMOTE
-[url "git@github.com:"]
-	insteadOf = https://github.com/
-[url "git@gitlab.com:"]
-	insteadOf = https://gitlab.com/
-[delta]
-  line-numbers = true
-  side-by-side = false
-  file-modified-label = modified:
-[interactive]
-  diffFilter = delta --color-only
+[init]
+	defaultBranch = main

@@ -1,0 +1,118 @@
+## -- PATHS --
+typeset -U path
+path+=($HOME/bin)
+
+case `uname` in
+  Darwin)
+    # commands for OS X go here
+  ;;
+  Linux)
+    # path=($HOME/.fnm $path)
+    export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
+  ;;
+  FreeBSD)
+    # commands for FreeBSD go here
+  ;;
+esac
+
+# Preferred editor
+if command -v nvim >/dev/null 2>&1; then
+  export EDITOR='nvim'
+else 
+  export EDITOR='vim'
+fi
+
+## -- ALIASES --
+alias :q="exit"
+alias getrandom='openssl rand -base64 32'
+alias lg='lazygit'
+alias dco='docker compose'
+
+## -- FUNCTIONS --
+function __get_fzf_instance() {
+  fzf-tmux \
+    --reverse \
+    --bind="ctrl-d:preview-down,ctrl-u:preview-up" \
+    --preview-window=wrap \
+    --preview="bat --color=always --plain {} 2>/dev/null || exa -1 --group-directories-first --color=always {}" \
+    "$@"
+}
+
+function __find_workspace_path() {
+  local folder_paths=(
+    "$HOME"
+    "$HOME/sandbox"
+    "$HOME/workspaces/personal"
+    "$HOME/workspaces/work"
+  )
+  local folder_path=$(fd . $(echo ${folder_paths[@]}) --max-depth=1 -t d | __get_fzf_instance --height=50% --no-info --prompt="Select a workspace: " --preview="")
+  
+  if [ -n "$folder_path" ]; then
+    echo "$folder_path"
+  fi
+}
+
+function f() {
+  local workspace_path=$(__find_workspace_path)
+  local selected
+
+  if [ -n "$workspace_path" ]; then
+    selected=$(fd . $workspace_path | __get_fzf_instance --prompt="Select a file: ")
+
+    if [ -n "$selected" ]; then
+      $EDITOR $selected
+    fi
+  fi
+}
+
+function fns() {
+  if [ ! -f package.json ]; then
+    echo "No package.json found in current directory." >&2
+  else
+    local script_name=$(jq '.scripts | keys[]' package.json -r \
+    | __get_fzf_instance --height=50% --prompt="Select a script to run: " --preview="jq '.scripts.\"{}\"' package.json -r")
+
+    if [ -n "$script_name" ]; then
+      npm run $(echo "$script_name")
+    fi
+  fi
+}
+
+function tms() {
+  local selected
+  local selected_name
+
+  if [[ $# -eq 1 ]]; then
+    selected="$1" && [[ "$selected" == "." ]] && selected="$(pwd)"
+  else
+    selected=$(__find_workspace_path)
+  fi
+
+  if [[ -z "$selected" ]]; then
+    return 0
+  fi
+
+  selected_name=$(basename "$selected" | tr . _)
+
+  if [[ -n "$TMUX" ]]; then
+    tmux switch-client -t "$selected_name" 2>/dev/null \
+      || (tmux new-session -ds "$selected_name" -c "$selected" && tmux switch-client -t "$selected_name")
+  elif [[ -z "$TMUX" ]]; then
+    tmux new-session -s "$selected_name" -c "$selected" \
+      || tmux attach -t "$selected_name"
+  fi
+}
+
+# Remove commented command from history
+function zshaddhistory() {
+  emulate -L zsh
+  if ! [[ "$1" =~ "(^ |^clear)" ]] ; then
+    print -sr -- "${1%%$'\n'}"
+    fc -p
+  else
+    return 1
+  fi
+}
+
+bindkey '^[#' pound-insert
+bindkey -s ^f 'tms\n'
