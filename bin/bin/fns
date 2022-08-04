@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+
+display_usage() {
+cat << EOF
+fns
+A simple bash script to run scripts defined in package.json.
+
+DEPENDENCIES: fzf, jq
+
+USAGE: fns [options] [script]
+
+OPTIONS:
+  -h, --help
+    Display this help message.
+  -p, --package-manager [npm|yarn|pnpm]
+    Specify the package manager to use. (default: npm) 
+EOF
+}
+
+get_runner() {
+  case "$1" in
+    "npm")
+      echo "npm run"
+      ;;
+    "yarn")
+      echo "yarn"
+      ;;
+    "pnpm")
+      echo "pnpm run"
+      ;;
+    *)
+      echo "npm run" # default
+      ;;
+  esac
+}
+
+while getopts ":h:p:" OPTION; do
+  case $OPTION in
+    h)
+      display_usage
+      exit 0
+      ;;
+    p)
+      PACKAGE_MANAGER="$OPTARG"
+      ;;
+    *)
+      ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+if ! type fzf jq >/dev/null 2>&1; then
+  echo -e "fzf or jq is not installed" >&2
+  exit 1
+fi
+
+if [ ! -f package.json ]; then
+  echo -e "No package.json found" >&2
+  exit
+else
+  script_name=$(jq '.scripts | keys[]' package.json -r \
+    | fzf -q "$1" --height=50% \
+          --prompt="Select a script to run: " \
+          --preview="jq '.scripts.\"{}\"' package.json -r")
+
+  runner=$(get_runner "$PACKAGE_MANAGER")
+  if [ -n "$script_name" ]; then
+    $runner "$script_name"
+  fi
+fi

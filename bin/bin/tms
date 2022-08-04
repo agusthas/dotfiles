@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+display_usage() {
+cat << EOF
+tms
+A simple bash script to manage workspaces sessions in tmux.
+
+DEPENDENCIES: fzf, fd, tmux
+
+ENVIRONMENT:
+  - WORKSPACES_LIST_PATH: path to workspaces list file.
+
+USAGE: tms WORKSPACE
+
+OPTIONS:
+  -h, --help
+    Display this help message.
+EOF
+}
+
+while getopts ":h:p:" OPTION; do
+  case $OPTION in
+    h)
+      display_usage
+      exit 0
+      ;;
+    *)
+      ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+LIST="${WORKSPACES_LIST_PATH:-""}"
+
+if ! type fzf fd >/dev/null; then
+  exit 1
+fi
+
+if ! [ -s "$LIST" ]; then
+  echo "No workspaces list found." >&2
+  exit 1
+fi
+
+if [[ $# -eq 1 ]]; then
+  workspace="$1" && [[ "$workspace" == "." ]] && workspace="$(pwd)"
+else
+  # shellcheck disable=SC2046
+  workspace=$(fd -p . $(<"$LIST" xargs) --max-depth=1 -t d \
+    | fzf --height=50% --no-info --prompt="Select a workspace: ")
+fi
+
+if [ -z "$workspace" ]; then
+  exit 0
+fi
+
+selected_name=$(basename "$workspace" | tr . _)
+
+if [[ -n "$TMUX" ]]; then
+  tmux switch-client -t "$selected_name" 2>/dev/null \
+    || (tmux new-session -ds "$selected_name" -c "$workspace" && tmux switch-client -t "$selected_name")
+elif [[ -z "$TMUX" ]]; then
+  tmux new-session -s "$selected_name" -c "$workspace" \
+    || tmux attach -t "$selected_name"
+fi
