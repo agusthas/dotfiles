@@ -5,7 +5,7 @@ cat << EOF
 fns
 A simple bash script to run scripts defined in package.json.
 
-DEPENDENCIES: fzf, jq
+DEPENDENCIES: fzf, jq, [tmux]
 
 USAGE: fns [options] [script]
 
@@ -64,7 +64,16 @@ else
           --preview="jq '.scripts.\"{}\"' package.json -r")
 
   runner=$(get_runner "$PACKAGE_MANAGER")
+
   if [ -n "$script_name" ]; then
-    $runner "$script_name"
+    if [ -n "$TMUX" ]; then
+      # create a new window
+      # switch to the new window
+      # run script
+      tmux new-window -d -n "$script_name" -c "#{pane_current_path}" "$runner $script_name"
+    else
+      $runner "$script_name"
+    fi
   fi
+
 fi
