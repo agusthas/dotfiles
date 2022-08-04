@@ -49,3 +49,7 @@ DOITCLIENT_BINARY=$(find "$(pwd)" -maxdepth 1 -type f -wholename "*/doitclient")
 
 mv "$DOITCLIENT_BINARY" "$APP_BIN_DIR"
 popd
+
+cat <<EOF > "$HOME/.doitrc"
+secret $HOME/.doit-secret
+EOF
