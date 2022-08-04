@@ -30,19 +30,14 @@ pushd "$doit_temp_dir"
 doit_zip_dir="doit.zip"
 
 # get doit from gdrive
-http -b \
-  --timeout 5 \
-  --download https://docs.google.com/uc export==download id=="$GDRIVE_ID" >> $doit_zip_dir
-# extract doit to $doit_temp_dir
+curl -fSL "https://docs.google.com/uc?export=download&id="$GDRIVE_ID"" --output "$doit_zip_dir"
 unzip $doit_zip_dir
 
 # get cmake
 pushd "$cmake_temp_dir"
-http -b \
-  --timeout 5 \
-  --download https://github.com/Kitware/CMake/releases/download/v3.23.3/cmake-3.23.3-linux-x86_64.tar.gz >> "$CMAKE_BASENAME"
+curl -fSL $CMAKE_DOWNLOAD_URL --output "$CMAKE_BASENAME"
 tar -xzf "$CMAKE_BASENAME"
-CMAKE_BINARY=$(find "$(pwd)" -type f -wholename "*/cmake")
+CMAKE_BINARY=$(find "$(pwd)" -maxdepth 3 -type f -wholename "*/cmake")
 
 echo "Using CMake binary: $CMAKE_BINARY"
 popd
@@ -50,7 +45,7 @@ popd
 $CMAKE_BINARY .
 $CMAKE_BINARY --build .
 
-DOITCLIENT_BINARY=$(find "$(pwd)" -type f -wholename "*/doitclient")
+DOITCLIENT_BINARY=$(find "$(pwd)" -maxdepth 1 -type f -wholename "*/doitclient")
 
 mv "$DOITCLIENT_BINARY" "$APP_BIN_DIR"
 popd
