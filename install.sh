@@ -2,7 +2,7 @@
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-apt_packages="zsh zip unzip curl wget stow jq tmux git httpie"
+apt_packages="zsh zip unzip curl wget stow jq tmux git httpie neovim"
 
 brew_packages="git httpie tmux jq"
 
@@ -18,6 +18,11 @@ case "$(uname -s)" in
     if ! grep -q ".*git-core/ppa.*" /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null; then
       echo "Installing Git PPA..."
       sudo add-apt-repository ppa:git-core/ppa
+    fi
+
+    if ! grep -q ".*neovim-ppa/stable.*" /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null; then
+      echo "Installing Neovim PPA..."
+      sudo add-apt-repository ppa:neovim-ppa/stable
     fi
 
     # if [[ ! -f "/etc/apt/sources.list.d/charm.list" ]]; then

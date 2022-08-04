@@ -36,7 +36,6 @@ if ! [[ "$skip_binaries" = "$YES" ]]; then
     'Linux')
       downgit sharkdp/fd
       downgit Schniz/fnm
-      downgit -c "nvim" neovim/neovim
       downgit ogham/exa
       downgit sharkdp/bat
       downgit -c "gh" cli/cli
