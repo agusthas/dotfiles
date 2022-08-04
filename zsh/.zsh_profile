@@ -5,15 +5,20 @@ path+=($HOME/bin)
 case `uname` in
   Darwin)
     # commands for OS X go here
+    __clip_cmd="pbcopy"
   ;;
   Linux)
     # path=($HOME/.fnm $path)
     # export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
-  ;;
-  FreeBSD)
-    # commands for FreeBSD go here
+    __clip_cmd="xclip -selection clipboard"
   ;;
 esac
+
+if [[ -n $SSH_CONNECTION ]]; then
+  if command -v doitclient >/dev/null 2>&1; then
+    __clip_cmd="doitclient wclip"
+  fi
+fi
 
 # Preferred editor
 if command -v nvim >/dev/null 2>&1; then
@@ -29,23 +34,16 @@ alias lg='lazygit'
 alias dco='docker compose'
 
 ## -- FUNCTIONS --
-function __get_fzf_instance() {
-  fzf-tmux \
-    --reverse \
-    --bind="ctrl-d:preview-down,ctrl-u:preview-up" \
-    --preview-window=wrap \
-    --preview="bat --color=always --plain {} 2>/dev/null || exa -1 --group-directories-first --color=always {}" \
-    "$@"
-}
-
+export FZF_DEFAULT_OPTS="--height 50% --reverse --bind 'ctrl-d:preview-down,ctrl-u:preview-up,ctrl-y:execute-silent(echo {} | ${__clip_cmd:-''})+abort' --preview-window wrap --preview '(bat --color=always --plain {} 2>/dev/null || exa -1 --group-directories-first --color=always {} 2>/dev/null || echo {})'"
+export WORKSPACES_PATH_STRING="$HOME $HOME/sandbox $HOME/workspaces/personal $HOME/workspaces/work"
+WORKSPACES_PATH=(
+  "$HOME"
+  "$HOME/sandbox"
+  "$HOME/workspaces/personal"
+  "$HOME/workspaces/work"
+)
 function __find_workspace_path() {
-  local folder_paths=(
-    "$HOME"
-    "$HOME/sandbox"
-    "$HOME/workspaces/personal"
-    "$HOME/workspaces/work"
-  )
-  local folder_path=$(fd . $(echo ${folder_paths[@]}) --max-depth=1 -t d | __get_fzf_instance --height=50% --no-info --prompt="Select a workspace: " --preview="")
+  local folder_path=$(fd -p . $WORKSPACES_PATH --max-depth=1 -t d | fzf --height=50% --no-info --prompt="Select a workspace: ")
   
   if [ -n "$folder_path" ]; then
     echo "$folder_path"
@@ -57,7 +55,7 @@ function f() {
   local selected
 
   if [ -n "$workspace_path" ]; then
-    selected=$(fd . $workspace_path | __get_fzf_instance --prompt="Select a file: ")
+    selected=$(fd . $workspace_path | fzf --prompt="Select a file: ")
 
     if [ -n "$selected" ]; then
       $EDITOR $selected
@@ -70,7 +68,7 @@ function fns() {
     echo "No package.json found in current directory." >&2
   else
     local script_name=$(jq '.scripts | keys[]' package.json -r \
-    | __get_fzf_instance --height=50% --prompt="Select a script to run: " --preview="jq '.scripts.\"{}\"' package.json -r")
+    | fzf --height=50% --prompt="Select a script to run: " --preview="jq '.scripts.\"{}\"' package.json -r")
 
     if [ -n "$script_name" ]; then
       npm run $(echo "$script_name")
@@ -101,6 +99,23 @@ function tms() {
     tmux new-session -s "$selected_name" -c "$selected" \
       || tmux attach -t "$selected_name"
   fi
+}
+
+# Docker
+# remove image include multi options
+function drmi() {
+  docker images \
+    | fzf -q "$1" --header-lines=1 --no-sort -m --tac --prompt="Choose image(s) to remove: " \
+    | awk '{print $3}' \
+    | xargs -I {} docker rmi {}
+}
+
+# remove volume include multi options
+function drmv() {
+  docker volume ls \
+    | fzf -q "$1" --header-lines=1 --no-sort -m --tac --prompt="Choose volume(s) to remove: " \
+    | awk {'print $2'} \
+    | xargs -I {} docker volume rm {}
 }
 
 # Remove commented command from history
