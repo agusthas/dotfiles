@@ -34,7 +34,7 @@ get_runner() {
   esac
 }
 
-while getopts ":h:p:" OPTION; do
+while getopts "hp:" OPTION; do
   case $OPTION in
     h)
       display_usage
@@ -44,6 +44,8 @@ while getopts ":h:p:" OPTION; do
       PACKAGE_MANAGER="$OPTARG"
       ;;
     *)
+      display_usage
+      exit 1
       ;;
   esac
 done

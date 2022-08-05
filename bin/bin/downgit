@@ -15,7 +15,7 @@ cmd=""
 app_bin_dir=${APP_BIN_DIR:-$HOME/bin}
 tmp_file="$(mktemp)"
 
-while getopts ":c:h:s:" o; do
+while getopts "hc:" o; do
   case "$o" in
     c) cmd="${OPTARG}";;
     h) usage >&2; exit 1;;

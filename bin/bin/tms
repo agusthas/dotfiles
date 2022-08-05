@@ -18,13 +18,15 @@ OPTIONS:
 EOF
 }
 
-while getopts ":h:p:" OPTION; do
-  case $OPTION in
+while getopts "h" OPTION; do
+  case "${OPTION}" in
     h)
       display_usage
       exit 0
       ;;
     *)
+      display_usage
+      exit 1
       ;;
   esac
 done
