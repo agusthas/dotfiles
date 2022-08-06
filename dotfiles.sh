@@ -15,13 +15,13 @@ fi
 stow_dotfiles zsh p10k git nvim tmux bin
 
 case "$(uname -s)" in
-  'Linux')
-    # stow_dotfiles ssh
-    ;;
-  'Darwin')
-    ;;
-  *)
-    echo "Unsupported OS"
-    exit 1
-    ;;
+'Linux')
+  stow_dotfiles ubuntu
+  ;;
+'Darwin') ;;
+
+*)
+  echo "Unsupported OS"
+  exit 1
+  ;;
 esac
