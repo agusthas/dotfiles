@@ -1,3 +1,10 @@
+local fn = vim.fn
+
+local install_path = fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
+if fn.empty(fn.glob(install_path)) > 0 then
+  packer_bootstrap = fn.system({'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path})
+end
+
 vim.cmd [[packadd packer.nvim]]
 
 local has = function(x)
@@ -30,6 +37,13 @@ return require('packer').startup {
     use "tpope/vim-commentary"
     use "tpope/vim-surround"
     use "junegunn/vim-easy-align"
+
+    -- Statusline
+    use { "nvim-lualine/lualine.nvim", config = function() require('lualine').setup() end }
+
+    if packer_bootstrap then
+      require('packer').sync()
+    end
   end,
 
   config = {

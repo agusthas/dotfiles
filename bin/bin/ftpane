@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+current_pane=$(tmux display-message -p '#I:#P')
+current_window=$(tmux display-message -p '#I')
+
+target=$(tmux list-panes -s -F "#I:#P|#{window_name}|#{pane_current_path}|#{pane_current_command}" \
+  | (echo "ID|Name|Path|Command" && cat) \
+  | column -t -s "|" \
+  | grep -v "$current_pane" \
+  | fzf --header-lines=1 --preview-window "hidden") || exit
+
+target_window=$(echo "$target" | cut -d" " -f 1 | cut -d":" -f 1)
+target_pane=$(echo "$target" | cut -d" " -f 1 | cut -d":" -f 2)
+
+if [[ $current_window -eq $target_window ]]; then
+  tmux select-pane -t "${target_window}"."${target_pane}"
+else
+  tmux select-pane -t "${target_window}"."${target_pane}" &&
+  tmux select-window -t "$target_window"
+fi

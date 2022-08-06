@@ -33,21 +33,20 @@ fi
 
 if ! [[ "$skip_binaries" = "$YES" ]]; then
   case "$(uname -s)" in
-    'Linux')
-      downgit sharkdp/fd
-      downgit Schniz/fnm
-      downgit -c "nvim" neovim/neovim
-      downgit ogham/exa
-      downgit sharkdp/bat
-      downgit -c "gh" cli/cli
-      ;;
-    'Darwin')
-      brew install bat fd fnm neovim exa gh
-      ;;
-    *)
-      __log "Unsupported OS"
-      exit 1
-      ;;
+  'Linux')
+    downbin sharkdp/fd
+    downbin Schniz/fnm
+    downbin ogham/exa
+    downbin sharkdp/bat
+    downbin cli/cli
+    ;;
+  'Darwin')
+    brew install bat fd fnm neovim exa gh
+    ;;
+  *)
+    __log "Unsupported OS"
+    exit 1
+    ;;
   esac
 fi
 

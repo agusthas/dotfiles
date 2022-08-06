@@ -1,26 +1,50 @@
+#!/usr/bin/env zsh
+
 ## -- PATHS --
 typeset -U path
 path+=($HOME/bin)
 
-case `uname` in
-  Darwin)
-    # commands for OS X go here
+case $(uname) in
+Darwin)
+  # commands for OS X go here
+  __clip_cmd="pbcopy"
   ;;
-  Linux)
-    # path=($HOME/.fnm $path)
-    export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
-  ;;
-  FreeBSD)
-    # commands for FreeBSD go here
+Linux)
+  # path=($HOME/.fnm $path)
+  # export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
+  __clip_cmd="xclip -selection clipboard"
   ;;
 esac
+
+if [[ -n $SSH_CONNECTION ]]; then
+  if command -v doitclient >/dev/null 2>&1; then
+    __clip_cmd="doitclient wclip"
+  fi
+fi
 
 # Preferred editor
 if command -v nvim >/dev/null 2>&1; then
   export EDITOR='nvim'
-else 
+else
   export EDITOR='vim'
 fi
+
+export FZF_DEFAULT_OPTS="
+--bind 'f1:toggle-preview,ctrl-d:preview-down,ctrl-u:preview-up,ctrl-y:execute-silent(echo {} | ${__clip_cmd:-''})+abort'
+--preview-window wrap
+--preview '(bat --color=always --plain {} 2>/dev/null || exa -1 --group-directories-first --color=always {} 2>/dev/null || echo {})'
+"
+export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS"
+--height 50%
+--reverse
+--prompt='❯ '
+--pointer='-'
+--marker='+'
+--tabstop=4
+--color=dark
+--color=hl:2:bold,fg+:4:bold,bg+:-1,hl+:2:bold,info:3:bold,border:8,prompt:2,pointer:5,marker:1,header:6
+"
+export WORKSPACES_LIST_PATH="$HOME/.workspaces_list" # MUST BE DEFINED
 
 ## -- ALIASES --
 alias :q="exit"
@@ -29,84 +53,27 @@ alias lg='lazygit'
 alias dco='docker compose'
 
 ## -- FUNCTIONS --
-function __get_fzf_instance() {
-  fzf-tmux \
-    --reverse \
-    --bind="ctrl-d:preview-down,ctrl-u:preview-up" \
-    --preview-window=wrap \
-    --preview="bat --color=always --plain {} 2>/dev/null || exa -1 --group-directories-first --color=always {}" \
-    "$@"
+# Docker
+# remove image include multi options
+function drmi() {
+  docker images |
+    fzf -q "$1" --header-lines=1 --no-sort -m --tac --prompt="Choose image(s) to remove: " |
+    awk '{print $3}' |
+    xargs -I {} docker rmi {}
 }
 
-function __find_workspace_path() {
-  local folder_paths=(
-    "$HOME"
-    "$HOME/sandbox"
-    "$HOME/workspaces/personal"
-    "$HOME/workspaces/work"
-  )
-  local folder_path=$(fd . $(echo ${folder_paths[@]}) --max-depth=1 -t d | __get_fzf_instance --height=50% --no-info --prompt="Select a workspace: " --preview="")
-  
-  if [ -n "$folder_path" ]; then
-    echo "$folder_path"
-  fi
-}
-
-function f() {
-  local workspace_path=$(__find_workspace_path)
-  local selected
-
-  if [ -n "$workspace_path" ]; then
-    selected=$(fd . $workspace_path | __get_fzf_instance --prompt="Select a file: ")
-
-    if [ -n "$selected" ]; then
-      $EDITOR $selected
-    fi
-  fi
-}
-
-function fns() {
-  if [ ! -f package.json ]; then
-    echo "No package.json found in current directory." >&2
-  else
-    local script_name=$(jq '.scripts | keys[]' package.json -r \
-    | __get_fzf_instance --height=50% --prompt="Select a script to run: " --preview="jq '.scripts.\"{}\"' package.json -r")
-
-    if [ -n "$script_name" ]; then
-      npm run $(echo "$script_name")
-    fi
-  fi
-}
-
-function tms() {
-  local selected
-  local selected_name
-
-  if [[ $# -eq 1 ]]; then
-    selected="$1" && [[ "$selected" == "." ]] && selected="$(pwd)"
-  else
-    selected=$(__find_workspace_path)
-  fi
-
-  if [[ -z "$selected" ]]; then
-    return 0
-  fi
-
-  selected_name=$(basename "$selected" | tr . _)
-
-  if [[ -n "$TMUX" ]]; then
-    tmux switch-client -t "$selected_name" 2>/dev/null \
-      || (tmux new-session -ds "$selected_name" -c "$selected" && tmux switch-client -t "$selected_name")
-  elif [[ -z "$TMUX" ]]; then
-    tmux new-session -s "$selected_name" -c "$selected" \
-      || tmux attach -t "$selected_name"
-  fi
+# remove volume include multi options
+function drmv() {
+  docker volume ls |
+    fzf -q "$1" --header-lines=1 --no-sort -m --tac --prompt="Choose volume(s) to remove: " |
+    awk {'print $2'} |
+    xargs -I {} docker volume rm {}
 }
 
 # Remove commented command from history
 function zshaddhistory() {
   emulate -L zsh
-  if ! [[ "$1" =~ "(^ |^clear)" ]] ; then
+  if ! [[ "$1" =~ "(^ |^clear)" ]]; then
     print -sr -- "${1%%$'\n'}"
     fc -p
   else
