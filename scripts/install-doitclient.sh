@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+if ! type unzip >/dev/null 2>&1; then
+  echo -e "unzip not installed" >&2
+  exit 1
+fi
+
 APP_BIN_DIR="$HOME/bin"
 while getopts ":d:" opt; do
   case $opt in
@@ -30,12 +35,12 @@ pushd "$doit_temp_dir"
 doit_zip_dir="doit.zip"
 
 # get doit from gdrive
-curl -fSL "https://docs.google.com/uc?export=download&id="$GDRIVE_ID"" --output "$doit_zip_dir"
+wget -O "$doit_zip_dir" "https://docs.google.com/uc?export=download&id="$GDRIVE_ID""
 unzip $doit_zip_dir
 
 # get cmake
 pushd "$cmake_temp_dir"
-curl -fSL $CMAKE_DOWNLOAD_URL --output "$CMAKE_BASENAME"
+wget -O "$CMAKE_BASENAME" $CMAKE_DOWNLOAD_URL
 tar -xzf "$CMAKE_BASENAME"
 CMAKE_BINARY=$(find "$(pwd)" -maxdepth 3 -type f -wholename "*/cmake")
 
