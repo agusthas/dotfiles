@@ -1,0 +1,136 @@
+#!/usr/bin/env bash
+
+tmp="/tmp/.downgit"
+mkdir -p "$tmp"
+tmp_file="$tmp/api.json"
+touch "$tmp_file"
+
+cleanup() {
+  rm -rf "$tmp"
+}
+trap cleanup SIGINT SIGTERM EXIT
+
+display_usage() {
+  cat <<EOF
+downgit
+A bash script to download the latest version of package from GitHub.
+
+DEPENDENCIES
+  fzf, jq, httpie
+
+USAGE
+  downgit [-h] <repo> <target_bin_dir>
+
+  -h Show this help message.
+  repo: The GitHub repository to download the latest version of the package.
+  target_bin_dir: The directory to download the package to. Absolute path only.
+
+EXAMPLE
+  downgit sharkdp/fd \$HOME/bin
+
+TODO
+  - support if downloading a folder that needs to be moved to a different location
+EOF
+}
+
+while getopts "h" OPTION; do
+  case $OPTION in
+  h)
+    display_usage
+    exit 0
+    ;;
+  *)
+    display_usage
+    exit 1
+    ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+repo="$1"
+if ! [ "$2" != "${2#/}" ]; then
+  echo "Error: target_bin_dir must be an absolute path."
+  exit 1
+fi
+target_bin_dir="$2"
+
+url="https://api.github.com/repos/$repo/releases/latest"
+
+if http --check-status --ignore-stdin --timeout=5 GET "$url" >"$tmp_file" 2>&1; then
+  pushd "$tmp" || exit 1
+  echo "Downloading latest release of $repo"
+
+  release_name=$(
+    jq -r '.assets[].name' "$tmp_file" |
+      fzf \
+        --query "$(uname -s | tr '[:upper:]' '[:lower:]')" \
+        --height=50% \
+        --reverse \
+        --no-info \
+        --prompt="Select a release: " \
+        --preview-window="hidden"
+  )
+
+  if [[ -z "$release_name" ]]; then
+    echo "No release selected"
+    exit
+  fi
+
+  browser_download_url=$(
+    jq -r \
+      --arg release_name "$release_name" '.assets[] | select(.name == $release_name) | .browser_download_url' \
+      "$tmp_file"
+  )
+
+  echo "Download URL: $browser_download_url"
+
+  http --ignore-stdin -b --timeout=5 --download "$browser_download_url"
+
+  if [ -f "$release_name" ]; then
+    case $release_name in
+    *.tar.bz2) tar xjf "$release_name" ;;
+    *.tar.gz) tar xzf "$release_name" ;;
+    *.tar.xz) tar xzf "$release_name" ;;
+    *.bz2) bunzip2 "$release_name" ;;
+    *.gz) gunzip "$release_name" ;;
+    *.tar) tar xf "$release_name" ;;
+    *.tbz2) tar xjf "$release_name" ;;
+    *.tgz) tar xzf "$release_name" ;;
+    *.zip) unzip "$release_name" ;;
+    *.Z) uncompress "$release_name" ;;
+    *.rar) rar x "$release_name" ;;    # 'rar' must to be installed
+    *.jar) jar -xvf "$release_name" ;; # 'jdk' must to be installed
+    *) echo "'$release_name' cannot be extracted via extract()" ;;
+    esac
+  fi
+
+  bin=$(
+    find . -type f |
+      fzf \
+        --exit-0 \
+        --height=50% \
+        --reverse \
+        --no-info \
+        --prompt="Select the executable: "
+  )
+
+  if [[ -n "$bin" ]]; then
+    basename=$(basename "$bin")
+    # shellcheck disable=SC2162
+    read -p "Choose an alias (empty to leave: $basename): " alias
+    target="$target_bin_dir/${alias:-$basename}"
+    echo "Installing $bin to $target"
+    mv "$bin" "$target" && chmod +x "$target" && echo "Success! Saved in: $target"
+  fi
+  popd || exit 1
+else
+  case $? in
+  2) echo 'Request timed out!' ;;
+  3) echo 'Unexpected HTTP 3xx Redirection!' ;;
+  4) echo 'HTTP 4xx Client Error!' ;;
+  5) echo 'HTTP 5xx Server Error!' ;;
+  6) echo 'Exceeded --max-redirects=<n> redirects!' ;;
+  *) echo 'Other Error!' ;;
+  esac
+  exit 1
+fi
