@@ -62,12 +62,13 @@ case "$(uname -s)" in
     git -C "$FZF_DIR" pull --rebase --force
   fi
   "$FZF_DIR/install" --bin
-  export PATH="$PATH:$HOME/.fzf"
+  export PATH="$PATH:$HOME/.fzf/bin"
 
   if ! echo "$SHELL" | grep -q "zsh"; then
     echo "Please manually change shell to zsh."
     echo "You can do this by running:"
     echo "  chsh -s \$(which zsh)"
+    exit 1
   fi
   ;;
 'Darwin')
@@ -80,8 +81,7 @@ case "$(uname -s)" in
   ;;
 esac
 
-clear
 /usr/bin/env bash -c "$SCRIPT_DIR/dotfiles.sh"
-# /usr/bin/env bash -c "$SCRIPT_DIR/app.sh"
+/usr/bin/env bash -c "$SCRIPT_DIR/app.sh"
 
 echo "[install.sh] Done!"

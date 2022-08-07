@@ -88,14 +88,14 @@ if http --check-status --ignore-stdin --timeout=5 GET "$url" >"$tmp_file" 2>&1; 
 
   if [ -f "$release_name" ]; then
     case $release_name in
-    *.tar.bz2) tar xjf "$release_name" ;;
-    *.tar.gz) tar xzf "$release_name" ;;
-    *.tar.xz) tar xzf "$release_name" ;;
+    *.tar.bz2) tar -xjf "$release_name" ;;
+    *.tar.gz) tar -xzf "$release_name" ;;
+    *.tar.xz) tar -xzf "$release_name" ;;
     *.bz2) bunzip2 "$release_name" ;;
     *.gz) gunzip "$release_name" ;;
-    *.tar) tar xf "$release_name" ;;
-    *.tbz2) tar xjf "$release_name" ;;
-    *.tgz) tar xzf "$release_name" ;;
+    *.tar) tar -xf "$release_name" ;;
+    *.tbz2) tar -xjf "$release_name" ;;
+    *.tgz) tar -xzf "$release_name" ;;
     *.zip) unzip "$release_name" ;;
     *.Z) uncompress "$release_name" ;;
     *.rar) rar x "$release_name" ;;    # 'rar' must to be installed

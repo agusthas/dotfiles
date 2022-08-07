@@ -34,11 +34,11 @@ fi
 if ! [[ "$skip_binaries" = "$YES" ]]; then
   case "$(uname -s)" in
   'Linux')
-    downbin sharkdp/fd
-    downbin Schniz/fnm
-    downbin ogham/exa
-    downbin sharkdp/bat
-    downbin cli/cli
+    downgit sharkdp/fd "$APP_BIN_DIR"
+    downgit Schniz/fnm "$APP_BIN_DIR"
+    downgit ogham/exa "$APP_BIN_DIR"
+    downgit sharkdp/bat "$APP_BIN_DIR"
+    downgit cli/cli "$APP_BIN_DIR"
     ;;
   'Darwin')
     brew install bat fd fnm neovim exa gh
