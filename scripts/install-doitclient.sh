@@ -1,21 +1,6 @@
 #!/usr/bin/env bash
 
-APP_BIN_DIR="$HOME/bin"
-while getopts ":d:" opt; do
-  case $opt in
-    d)
-      APP_BIN_DIR="$OPTARG"
-      ;;
-  esac
-done
-shift $((OPTIND-1))
-
-if [[ ! -d "$APP_BIN_DIR" ]]; then
-  mkdir -p "$APP_BIN_DIR"
-fi
-
-GDRIVE_ID="1p0jXJbJM_cp83fxUhF05aGLJbmbCSTTY"
-DOIT_BASENAME="doit.zip"
+GDRIVE_ID="1bpjwl4NILQ3Lb_76MtOL0sn1BKw_6hcd"
 CMAKE_DOWNLOAD_URL="https://github.com/Kitware/CMake/releases/download/v3.23.3/cmake-3.23.3-linux-x86_64.tar.gz" # pick linux-x86_64 tar.gz version
 CMAKE_BASENAME=$(basename $CMAKE_DOWNLOAD_URL) # get the filename
 
@@ -26,17 +11,17 @@ cleanup() {
 }
 trap cleanup SIGHUP SIGINT SIGTERM EXIT
 
-pushd "$doit_temp_dir"
-doit_zip_dir="doit.zip"
+pushd "$doit_temp_dir" || exit 1
+doit_tar_gz_dir="doit.tar.gz"
 
 # get doit from gdrive
-curl -fSL "https://docs.google.com/uc?export=download&id="$GDRIVE_ID"" --output "$doit_zip_dir"
-unzip $doit_zip_dir
+wget -O "$doit_tar_gz_dir" "https://docs.google.com/uc?export=download&id="$GDRIVE_ID"" || exit 1
+tar -xzf $doit_tar_gz_dir || exit 1
 
 # get cmake
-pushd "$cmake_temp_dir"
-curl -fSL $CMAKE_DOWNLOAD_URL --output "$CMAKE_BASENAME"
-tar -xzf "$CMAKE_BASENAME"
+pushd "$cmake_temp_dir" || exit 1
+wget -O "$CMAKE_BASENAME" $CMAKE_DOWNLOAD_URL || exit 1
+tar -xzf "$CMAKE_BASENAME" || exit 1
 CMAKE_BINARY=$(find "$(pwd)" -maxdepth 3 -type f -wholename "*/cmake")
 
 echo "Using CMake binary: $CMAKE_BINARY"
@@ -46,10 +31,24 @@ $CMAKE_BINARY .
 $CMAKE_BINARY --build .
 
 DOITCLIENT_BINARY=$(find "$(pwd)" -maxdepth 1 -type f -wholename "*/doitclient")
+popd || exit 1
 
-mv "$DOITCLIENT_BINARY" "$APP_BIN_DIR"
-popd
+curr_dir="$(pwd)"
+echo "======================="
+echo "By default this script install to $curr_dir"
 
-cat <<EOF > "$HOME/.doitrc"
+mv "$DOITCLIENT_BINARY" "$curr_dir" && echo "Binary installed in: $curr_dir. Move them to the folder listed in \$PATH"
+
+echo "Creating doitrc in $curr_dir/.doitrc"
+cat <<EOF > "$curr_dir/.doitrc"
 secret $HOME/.doit-secret
 EOF
+
+echo "Generating secrets"
+dd if=/dev/random of=$curr_dir/.doit-secret bs=64 count=1
+
+echo "==============="
+echo "INSTRUCTIONS"
+echo "Move doitclient to any folder listed in \$PATH"
+echo "Move both .doitrc and .doit-secret to $HOME"
+echo "DONE"
