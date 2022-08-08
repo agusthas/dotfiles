@@ -68,14 +68,6 @@ else
   runner=$(get_runner "$PACKAGE_MANAGER")
 
   if [ -n "$script_name" ]; then
-    if [ -n "$TMUX" ]; then
-      # create a new window
-      # switch to the new window
-      # run script
-      tmux new-window -d -n "$script_name" -c "#{pane_current_path}" "$runner $script_name"
-    else
-      $runner "$script_name"
-    fi
+    $runner "$script_name"
   fi
-
 fi
