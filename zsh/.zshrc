@@ -72,6 +72,8 @@ plugins=(git fzf zsh-autosuggestions zsh-syntax-highlighting)
 export FZF_CTRL_T_COMMAND="fd --type f -IH --exclude .git --exclude node_modules"
 
 export ZSH_AUTOSUGGEST_STRATEGY=(history)
+export ZSH_AUTOSUGGEST_MAX_SIZE=20
+export ZSH_AUTOSUGGEST_HISTORY_IGNORE="?(#c50,)"
 
 source $ZSH/oh-my-zsh.sh
 

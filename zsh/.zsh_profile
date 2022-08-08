@@ -53,6 +53,8 @@ alias lg='lazygit'
 alias dco='docker compose'
 
 ## -- FUNCTIONS --
+function cap() { tee /tmp/capture.out; }
+function ret() { cat /tmp/capture.out; }
 # Docker
 # remove image include multi options
 function drmi() {
