@@ -98,4 +98,4 @@ read -r answer
 [[ "$answer" =~ ^[Yy]$ ]] || exit 0
 
 sudo apt update && sudo apt upgrade -y
-sudo "$apt_cmd" "${packages[@]}"
+sudo $apt_cmd "${packages[@]}"
