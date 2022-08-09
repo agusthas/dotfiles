@@ -31,7 +31,7 @@ fi
 
 export FZF_DEFAULT_OPTS="
 --bind 'f1:toggle-preview,ctrl-d:preview-down,ctrl-u:preview-up,ctrl-y:execute-silent(echo {} | ${__clip_cmd:-''})+abort'
---preview-window wrap
+--preview-window 'hidden,wrap'
 --preview '(bat --color=always --plain {} 2>/dev/null || exa -1 --group-directories-first --color=always {} 2>/dev/null || echo {})'
 "
 export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS"
