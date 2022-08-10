@@ -10,7 +10,7 @@ stow_dotfiles() {
 # This is a workaround for the fact that stow SYMLINK the directory if it doesn't exist
 mkdir "$HOME/bin" "$HOME/.config"
 
-stow_dotfiles zsh p10k git nvim tmux bin
+stow_dotfiles zsh git nvim tmux bin
 
 case "$(uname -s)" in
 'Linux')
