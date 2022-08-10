@@ -16,8 +16,9 @@ case "$(uname -s)" in
 'Linux')
   stow_dotfiles ubuntu
   ;;
-'Darwin') ;;
-
+'Darwin')
+  stow_dotfiles macos
+  ;;
 *)
   echo "Unsupported OS"
   exit 1
