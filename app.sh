@@ -87,6 +87,14 @@ else
   git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_DIR"
 fi
 
+__info "forgit"
+FORGIT_DIR="$omz_custom_dir/plugins/forgit"
+if [ -d "$FORGIT_DIR" ]; then
+  git -C "$FORGIT_DIR" pull --rebase --force
+else
+  git clone --depth=1 https://github.com/wfxr/forgit "$FORGIT_DIR"
+fi
+
 __info "zsh-autosuggestions"
 ZSH_AUTOSUGGESTIONS_DIR="$omz_custom_dir/plugins/zsh-autosuggestions"
 if [ -d "$ZSH_AUTOSUGGESTIONS_DIR" ]; then
