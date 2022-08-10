@@ -33,8 +33,6 @@ export FZF_DEFAULT_OPTS="
 --bind 'f1:toggle-preview,ctrl-d:preview-down,ctrl-u:preview-up,ctrl-y:execute-silent(echo {} | ${__clip_cmd:-''})+abort'
 "
 export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS"
---height 50%
---reverse
 --prompt='❯ '
 --pointer='-'
 --marker='+'
