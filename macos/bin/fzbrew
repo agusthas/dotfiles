@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+display_usage() {
+  echo "Usage: $0 [install|remove] <base-query>"
+}
+
+if ! type fzf jq http >/dev/null; then
+  exit 1
+fi
+
+declare -a packages
+
+option="$1"
+shift
+if [ $option == 'install' ]; then
+  tmp_file=$(mktemp)
+  # redirect stderr to stdout, but stdout to a file
+  if http --check-status --ignore-stdin --timeout=2.5 GET https://formulae.brew.sh/api/formula.json 2>&1 > $tmp_file; then
+    packages=($(jq -r '.[] | .name' $tmp_file -r | fzf --height 100% --query="$1" --multi --preview 'brew info --json {} | jq --color-output -r'))
+  else
+    exit 1
+  fi
+  rm -f $tmp_file
+elif [ "$option" == "remove" ]; then
+  packages=($(brew list --formulae -1 | fzf --height 100% --query "$1" --multi --preview 'brew info --json {} | jq --color-output -r'))
+else
+  display_usage
+  exit 1
+fi
+
+if ! [ ${#packages[@]} -eq 0 ]; then
+  echo "Packages to ${option}:" "${packages[@]}"
+  read -r -n 1 -p "Are you sure? [y/N] " answer
+  [[ "$answer" =~ ^[Yy]$ ]] || exit 0
+
+  printf "\n"
+  if [ "$option" == 'install' ]; then
+    brew install "${packages[@]}"
+  elif [ "$option" == 'remove' ]; then
+    brew uninstall "${packages[@]}"
+  fi
+fi
