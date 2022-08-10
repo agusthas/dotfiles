@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 tmpfile=/tmp/jqreplinput
-JQREPL_HISTORY_FILE=$HOME/.jqrepl_history
 
 cleanup() {
   [[ -e "$tmpfile" ]] && rm "$tmpfile"
@@ -15,25 +14,12 @@ else
   input=$1
 fi
 
-query=$(echo '' \
-      | fzf --disabled \
-          --height=99% \
-          --no-info \
-          --print-query \
-          --reverse \
-          --history="$JQREPL_HISTORY_FILE" \
-          --preview "jq --color-output -r {q} \"$input\"" \
-          --query="." \
-          --bind "tab:replace-query,return:print-query" \
-          --bind="ctrl-d:preview-down,ctrl-u:preview-up")
-
-if [[ -z $query ]]; then
-  exit 1
-fi
-
-if jq "$query" "$input" > /dev/null 2>&1; then
-  jq -r "$query" "$input"
-else
-  echo "Error in query: $query"
-  exit 1
-fi
+echo '' \
+  | fzf --disabled \
+      --preview-window="down:90%" \
+      --height=99% \
+      --no-info \
+      --print-query \
+      --reverse \
+      --preview "jq --color-output -r {q} $input" \
+      --query="." \
