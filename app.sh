@@ -26,28 +26,31 @@ __warn() {
 
 # START FROM HERE (PLATFORM SPECIFIC)
 
-declare -Ar apps=(
-  [fd]="sharkdp/fd"
-  [fnm]="Schniz/fnm"
-  [exa]="ogham/exa"
-  [bat]="sharkdp/bat"
-  [gh]="cli/cli"
+# SPACES here is important!
+packages=(
+  "fd sharkdp/fd"
+  "fnm Schniz/fnm"
+  "exa ogham/exa"
+  "bat sharkdp/bat"
+  "gh cli/cli"
 )
 
-for key in ${!apps[@]}; do
-  printf "%s -> %s\n" "$key" "${apps[$key]}"
-done
+printf "%s\n" "${packages[@]}" | (echo "NAME URL" && cat) | column -t -s " "
+
 read -r -p "Do you want to install these apps? [y/N] " response
 
 if [[ $response =~ ^[Yy]$ ]]; then
   case "$(uname -s)" in
   'Linux')
-    for key in ${!apps[@]}; do
-      downgit ${apps[$key]} "${APP_BIN_DIR}"
+    for package in "${packages[@]}"; do
+      url=$(echo "$package" | awk '{print $2}')
+      downgit $url "${APP_BIN_DIR}"
     done
     ;;
   'Darwin')
-    brew install ${!apps[@]}
+    printf "%s\n" "${packages[@]}" \
+      | awk '{print $1}' \
+      | xargs brew install
     ;;
   *)
     __error "Unsupported OS"
