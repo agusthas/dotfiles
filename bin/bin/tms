@@ -48,7 +48,7 @@ if [[ $# -eq 1 ]]; then
 else
   # shellcheck disable=SC2046
   workspace=$(fd -p . $(<"$LIST" xargs) --max-depth=1 -t d \
-    | fzf --height=50% --no-info --prompt="Select a workspace: ")
+    | fzf --reverse --height=50% --no-info --prompt="Select a workspace: ")
 fi
 
 if [ -z "$workspace" ]; then
@@ -58,9 +58,9 @@ fi
 selected_name=$(basename "$workspace" | tr . _)
 
 if [[ -n "$TMUX" ]]; then
-  tmux switch-client -t "$selected_name" 2>/dev/null \
+  tmux switch-client -t "$selected_name" &>/dev/null \
     || (tmux new-session -ds "$selected_name" -c "$workspace" && tmux switch-client -t "$selected_name")
 elif [[ -z "$TMUX" ]]; then
-  tmux new-session -s "$selected_name" -c "$workspace" \
+  tmux new-session -s "$selected_name" -c "$workspace" &>/dev/null \
     || tmux attach -t "$selected_name"
 fi
