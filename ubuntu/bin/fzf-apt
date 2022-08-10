@@ -1,101 +1,35 @@
 #!/usr/bin/env bash
 
 display_usage() {
-  cat <<EOF
-fzf-apt
-Allows to select apt package(s) by using fzf and then install/remove them.
-This also perform a search if:
-  - the package match one or more pattern. (eg. "lib" will match "libcurl" and "libcurl7")
-
-DEPENDENCIES: fzf, [rg]
-
-USAGE:
-  fzf-apt [install|remove] [package_name...]
-
-EXAMPLE:
-  fzf-apt install roll php
-  fzf-apt remove emacs nano roll
-
-OPTIONS:
-  -h, --help
-    Display this help message.
-EOF
+  echo "Usage: $0 [install|remove] <base-query>"
 }
-
-while getopts "hri" OPTION; do
-  case "${OPTION}" in
-  h)
-    display_usage
-    exit 0
-    ;;
-  *)
-    display_usage
-    exit 1
-    ;;
-  esac
-done
-shift $((OPTIND - 1))
-
-option="$1"
-if [ "$option" == "install" ]; then
-  apt_cmd="apt-get install"
-elif [ "$option" == "remove" ]; then
-  apt_cmd="apt-get purge"
-else
-  display_usage
-  exit 1
-fi
-shift
 
 if ! type fzf >/dev/null; then
   exit 1
 fi
 
-if ! type rg >/dev/null 2>&1; then
-  replace_cmd="sed 's/\ -.*//'"
+declare -a packages
+
+option="$1"
+shift
+if [ $option == 'install' ]; then
+  apt_cmd="apt-get install"
+  packages=($(apt-cache search . | sed 's/\ -.*//' | fzf --query "$1" --height 100% --multi --info=inline --preview 'apt-cache show {}'))
+elif [ "$option" == "remove" ]; then
+  apt_cmd="apt-get purge"
+  packages=($(dpkg --get-selections | awk '{print $1}' | fzf --query "$1" --height 100% --multi --info=inline --preview 'apt-cache show {}'))
 else
-  replace_cmd="rg ' -.*' -r ''"
+  display_usage
+  exit 1
 fi
 
-declare -a packages
-declare -a skipped_packages
-
-for package in "$@"; do
-  tmp_file="/tmp/.fzf-apt-temp"
-  numOfPkgs=$(
-    apt-cache search --names-only '^'"$package"'.*' |
-      eval "$replace_cmd" |
-      tee "$tmp_file" |
-      wc -l |
-      cut -d ' ' -f 1
-  )
-
-  if [[ $numOfPkgs -eq 1 ]]; then
-    packages+=("$(cat "$tmp_file")")
-    continue
-  fi
-
-  selected_packages=$(
-    fzf -1 --header="Choose package(s) for: $package" --exit-0 --multi --preview-window 'nowrap' --preview 'apt-cache show {} 2>/dev/null' <"$tmp_file" |
-      xargs
-  )
-
-  if [[ -n "$selected_packages" ]]; then
-    packages+=("$selected_packages")
-  else
-    skipped_packages+=("$package")
-  fi
-done
-
-cat <<EOF
-SUMMARY:
-  Packages to ${option}: ${packages[@]}
-  Packages to skip: ${skipped_packages[@]}
-EOF
-
+echo "Packages to ${option}:" "${packages[@]}"
 printf "Are you sure? [y/N] "
 read -r answer
 [[ "$answer" =~ ^[Yy]$ ]] || exit 0
 
-sudo apt update && sudo apt upgrade -y
-sudo $apt_cmd "${packages[@]}"
+if [ "$option" == 'install' ]; then
+  sudo apt-get -qq update && sudo apt-get -qq upgrade
+fi
+
+sudo $apt_cmd "${packages[@]}" -y
