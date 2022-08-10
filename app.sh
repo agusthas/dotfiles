@@ -59,6 +59,14 @@ fi
 # UNIVERSAL
 __log "UNIVERSAL"
 
+__info "oh-my-tmux"
+OMT_DIR="$HOME/.oh-my-tmux"
+if [ -d "$OMT_DIR" ]; then
+  git -C "$OMT_DIR" pull --rebase --force
+else
+  git clone --depth=1 https://github.com/gpakosz/.tmux "$OMT_DIR" && ln -s -f "$OMT_DIR/.tmux.conf" "$HOME/.tmux.conf"
+fi
+
 __info "oh-my-zsh"
 OMZ_DIR="$HOME/.oh-my-zsh"
 if [[ ! -d "$OMZ_DIR" ]]; then
