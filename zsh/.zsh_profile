@@ -60,6 +60,29 @@ alias dco='docker compose'
 ## -- FUNCTIONS --
 function cap() { tee /tmp/capture.out; }
 function ret() { cat /tmp/capture.out; }
+# Tmux
+# Kill server but with confirmation to kill all sessions
+function tks() {
+  if [[ -n $TMUX ]]; then
+    echo "Still attached to tmux. Please detach first."
+    return 1
+  else
+    # List active tmux sessions if any
+    if tmux ls >/dev/null 2>&1; then
+      echo "Active tmux sessions:"
+      tmux ls
+      printf "\n"
+
+      echo -n "Do you want to kill the tmux server? [y/N] "
+      read answer
+    fi
+
+    if [[ -z $answer || $answer =~ ^[Yy]$ ]]; then
+      tmux kill-server
+    fi
+  fi
+}
+
 # Docker
 # remove image include multi options
 function drmi() {
