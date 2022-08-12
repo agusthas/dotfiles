@@ -102,6 +102,7 @@ fi
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 source ~/.zsh_profile
+[[ ! -f ~/.zsh_profile.local ]] || source ~/.zsh_profile.local
 
 # fnm
 eval "$(fnm env --use-on-cd)"
