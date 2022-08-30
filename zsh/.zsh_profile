@@ -83,6 +83,38 @@ function tks() {
   fi
 }
 
+function fns() {
+  if [ ! -f package.json ]; then
+    echo -e "No package.json found" >&2
+    return 1
+  fi
+
+  local printCommand="false"
+  if [[ $1 == "-p" ]]; then
+    printCommand="true"
+    echo ">> Printing running script to prompt"
+    shift
+  else
+    echo ">> Executing script"
+    echo ">> use \`fns -p\` to print script to prompt"
+  fi
+
+  local script_name=$(jq '.scripts | keys[]' package.json -r \
+    | fzf -q "$1" --height=50% \
+          --reverse \
+          --preview-window "nohidden:70%" \
+          --prompt="Select a script: " \
+          --preview="jq '.scripts.\"{}\"' package.json -r")
+  
+  if [ -n "$script_name" ]; then
+    if [[ "$printCommand" == "true" ]]; then
+      print -z "npm run $script_name"
+    else
+      npm run $script_name
+    fi
+  fi
+}
+
 # Docker
 # remove image include multi options
 function drmi() {
@@ -103,7 +135,7 @@ function drmv() {
 # Remove commented command from history
 function zshaddhistory() {
   emulate -L zsh
-  if ! [[ "$1" =~ "(^ |^clear)" ]]; then
+  if ! [[ "$1" =~ "(^ |^clear|^fns)" ]]; then
     print -sr -- "${1%%$'\n'}"
     fc -p
   else
