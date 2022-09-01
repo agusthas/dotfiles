@@ -44,8 +44,8 @@ case "$(uname -s)" in
 
   if [[ ! -f "/etc/apt/sources.list.d/httpie.list" ]]; then
     echo "Installing Httpie PPA..."
-    curl -SsL https://packages.httpie.io/deb/KEY.gpg | sudo apt-key add -
-    sudo curl -SsL -o /etc/apt/sources.list.d/httpie.list https://packages.httpie.io/deb/httpie.list
+    curl -SsL https://packages.httpie.io/deb/KEY.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/httpie.gpg
+    echo "deb [signed-by=/etc/apt/keyrings/httpie.gpg] https://packages.httpie.io/deb ./" | sudo tee /etc/apt/sources.list.d/httpie.list >/dev/null
   fi
 
   # Update and upgrade packages
