@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 APP_BIN_DIR=${APP_BIN_DIR:-$HOME/bin}
 
 # region Helpers
@@ -27,30 +28,30 @@ __warn() {
 # START FROM HERE (PLATFORM SPECIFIC)
 
 # SPACES here is important!
-packages=(
-  "fd sharkdp/fd"
-  "fnm Schniz/fnm"
-  "exa ogham/exa"
-  "bat sharkdp/bat"
-  "gh cli/cli"
-)
+cat $SCRIPT_DIR/app.json \
+  | jq -r '(["NAME","REPO URL"] | (., map(length*"-"))), (.[] | [.name, .repo_url]) | @tsv' \
+  | column -t -s$'\t'
 
-printf "%s\n" "${packages[@]}" | (echo "NAME URL" && cat) | column -t -s " "
+printf "\n"
 
 read -r -p "Do you want to install these apps? [y/N] " response
 
+__log "APPS"
 if [[ $response =~ ^[Yy]$ ]]; then
   case "$(uname -s)" in
   'Linux')
-    for package in "${packages[@]}"; do
-      url=$(echo "$package" | awk '{print $2}')
-      downgit $url "${APP_BIN_DIR}"
+    for row in $(cat $SCRIPT_DIR/app.json | jq -r '.[] | @base64'); do
+      url=$(echo "$row" | base64 --decode | jq -r '.repo_url')
+      release_query=$(echo "$row" | base64 --decode | jq -r '.release_query')
+      exe_query=$(echo "$row" | base64 --decode | jq -r '.executable_query')
+      bin_name=$(echo "$row" | base64 --decode | jq -r '.binary_name')
+
+      downgit -r "$release_query" -e "$exe_query" -n "$bin_name" -d "$APP_BIN_DIR" $url
+      printf "\n"
     done
     ;;
   'Darwin')
-    printf "%s\n" "${packages[@]}" \
-      | awk '{print $1}' \
-      | xargs brew install
+    cat $SCRIPT_DIR/app.json | jq -r '.[] | .name' | xargs brew install
     ;;
   *)
     __error "Unsupported OS"
@@ -58,6 +59,7 @@ if [[ $response =~ ^[Yy]$ ]]; then
     ;;
   esac
 fi
+printf "\n"
 
 # UNIVERSAL
 __log "UNIVERSAL"

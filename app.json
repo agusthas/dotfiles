@@ -1,0 +1,37 @@
+[
+  {
+    "repo_url": "sharkdp/fd",
+    "release_query": "^fd x86_64 musl tar.gz$",
+    "executable_query": "/fd$",
+    "binary_name": "fd",
+    "name": "fd"
+  },
+  {
+    "repo_url": "Schniz/fnm",
+    "release_query": "^fnm linux zip$",
+    "executable_query": "/fnm$",
+    "binary_name": "fnm",
+    "name": "fnm"
+  },
+  {
+    "repo_url": "ogham/exa",
+    "release_query": "^exa linux x86_64 musl .zip$",
+    "executable_query": "/exa$",
+    "binary_name": "exa",
+    "name": "exa"
+  },
+  {
+    "repo_url": "sharkdp/bat",
+    "release_query": "^bat x86_64 musl tar.gz$",
+    "executable_query": "/bat$",
+    "binary_name": "bat",
+    "name": "bat"
+  },
+  {
+    "repo_url": "cli/cli",
+    "release_query": "^gh linux amd64 tar.gz$",
+    "executable_query": "/gh$",
+    "binary_name": "gh",
+    "name": "gh"
+  }
+]

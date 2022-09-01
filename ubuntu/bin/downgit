@@ -19,51 +19,72 @@ DEPENDENCIES
   fzf, jq, httpie
 
 USAGE
-  downgit [-h] <repo> <target_bin_dir>
+  downgit [-h] [-r <release_query>] [-d <target_bin_dir>] [-e <executable_query>] [-n <binary_name>] <repo>
 
   -h Show this help message.
-  repo: The GitHub repository to download the latest version of the package.
-  target_bin_dir: The directory to download the package to. Absolute path only.
-
-EXAMPLE
-  downgit sharkdp/fd \$HOME/bin
-
-TODO
-  - support if downloading a folder that needs to be moved to a different location
+  -r Release query in FZF format. (e.g. '^fd x86_64 musl tar.gz$')
+  -e Executable query in FZF format. (e.g. '/fd$')
+  -n Binary name. (e.g. 'fd')
+  -d Target bin directory. (e.g. \$HOME/bin)
 EOF
 }
 
-while getopts "h" OPTION; do
-  case $OPTION in
-  h)
-    display_usage
-    exit 0
-    ;;
-  *)
+while test $# -gt 0; do
+  case "$1" in
+   -h)
     display_usage
     exit 1
     ;;
+   -r)
+    shift
+    release_query="$1"
+    shift
+    ;;
+  -d)
+    shift
+    target_bin_dir="$1"
+    shift
+    ;;
+  -e)
+    shift
+    executable_query="$1"
+    shift
+    ;;
+  -n)
+    shift
+    name="$1"
+    shift
+    ;;
+  *)
+    break
+    ;;
   esac
 done
-shift $((OPTIND - 1))
 
 repo="$1"
-if ! [ "$2" != "${2#/}" ]; then
-  echo "Error: target_bin_dir must be an absolute path."
+if ! [ "$target_bin_dir" != "${2#/}" ]; then
+  echo "target_bin_dir must be an absolute path"
   exit 1
 fi
-target_bin_dir="$2"
+
+echo "[INFO] REPO: $repo"
+echo "[INFO] RELEASE QUERY: $release_query"
+echo "[INFO] TARGET_BIN_DIR: $target_bin_dir"
+echo "[INFO] EXECUTABLE QUERY: $executable_query"
+echo "[INFO] NAME: $name"
+printf "\n"
 
 url="https://api.github.com/repos/$repo/releases/latest"
 
 if http --check-status --ignore-stdin --timeout=5 GET "$url" >"$tmp_file" 2>&1; then
-  pushd "$tmp" || exit 1
+  pushd "$tmp" >/dev/null || exit 1
   echo "Downloading latest release of $repo"
 
   release_name=$(
     jq -r '.assets[].name' "$tmp_file" |
       fzf \
-        --query "$(uname -s | tr '[:upper:]' '[:lower:]')" \
+        --query "$release_query" \
+        --select-1 \
         --height=50% \
         --reverse \
         --no-info \
@@ -83,8 +104,9 @@ if http --check-status --ignore-stdin --timeout=5 GET "$url" >"$tmp_file" 2>&1; 
   )
 
   echo "Download URL: $browser_download_url"
+  echo "Download to: $release_name"
 
-  http --ignore-stdin -b --timeout=5 --download "$browser_download_url"
+  http --ignore-stdin -b --timeout 5 -dco "$release_name" "$browser_download_url"
 
   if [ -f "$release_name" ]; then
     case $release_name in
@@ -96,7 +118,7 @@ if http --check-status --ignore-stdin --timeout=5 GET "$url" >"$tmp_file" 2>&1; 
     *.tar) tar -xf "$release_name" ;;
     *.tbz2) tar -xjf "$release_name" ;;
     *.tgz) tar -xzf "$release_name" ;;
-    *.zip) unzip "$release_name" ;;
+    *.zip) unzip -q "$release_name" ;;
     *.Z) uncompress "$release_name" ;;
     *.rar) rar x "$release_name" ;;    # 'rar' must to be installed
     *.jar) jar -xvf "$release_name" ;; # 'jdk' must to be installed
@@ -107,7 +129,8 @@ if http --check-status --ignore-stdin --timeout=5 GET "$url" >"$tmp_file" 2>&1; 
   bin=$(
     find . -type f |
       fzf \
-        --exit-0 \
+        --query "$executable_query" \
+        --select-1 \
         --height=50% \
         --reverse \
         --no-info \
@@ -116,13 +139,16 @@ if http --check-status --ignore-stdin --timeout=5 GET "$url" >"$tmp_file" 2>&1; 
 
   if [[ -n "$bin" ]]; then
     basename=$(basename "$bin")
-    # shellcheck disable=SC2162
-    read -p "Choose an alias (empty to leave: $basename): " alias
-    target="$target_bin_dir/${alias:-$basename}"
+    if [[ -z "$name" ]]; then
+      read -p "Choose an alias (empty to leave: $basename): " name
+    fi
+    target="$target_bin_dir/${name:-$basename}"
     echo "Installing $bin to $target"
-    mv "$bin" "$target" && chmod +x "$target" && echo "Success! Saved in: $target"
+    mv "$bin" "$target" && chmod +x "$target" && echo "[SUCCESS] Saved in: $target"
+  else 
+    echo "[ERROR] No executable selected"
   fi
-  popd || exit 1
+  popd >/dev/null || exit 1
 else
   case $? in
   2) echo 'Request timed out!' ;;
