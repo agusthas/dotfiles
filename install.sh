@@ -23,6 +23,14 @@ brew_packages=(
   "fzf"
 )
 
+# Generate ASCII Text
+if ! type base64 gunzip >/dev/null; then
+  echo "= INSTALL.SH ="
+else
+  base64 -d <<<"H4sIAKGGEWMAA51NwRHAMAj6OwXP9uVCuWMRhy+YmAHqeUgECQCqQM9DOQPo7UWM2R1A6p2JSggp2inmKKvSDzZpyR06GyG5sMZnj07FNTc60g6HCkI7f5RlFHXCgWJ5tQXmw3fMbQn8rg8Stz4QJgEAAA==" | gunzip
+fi
+printf "\n"
+
 case "$(uname -s)" in
 'Linux')
   echo "======= LINUX ======="
