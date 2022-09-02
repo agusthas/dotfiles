@@ -55,7 +55,6 @@ alias :q="exit"
 alias getrandom='openssl rand -base64 32'
 alias gcm="git commit -m"
 alias lg='lazygit'
-alias dco='docker compose'
 
 ## -- FUNCTIONS --
 function cap() { tee /tmp/capture.out; }
