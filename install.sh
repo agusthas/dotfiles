@@ -45,7 +45,8 @@ base_install() {
     "${shared_packages[@]}"
     "zip"
     "unzip"
-    "curl"
+    "p7zip-full"
+    "p7zip-rar"
     "fd-find"
   )
 
@@ -197,7 +198,9 @@ create_symlinks() {
 parse_args "$@"
 [ "$skip_base" != "true" ] && base_install
 [ "$skip_symlinks" != "true" ] && create_symlinks
-setup_ohmyzsh
-setup_ohmytmux
+if [ "$skip_extras" != "true" ]; then
+  setup_ohmyzsh
+  setup_ohmytmux
+fi
 
 echo "[install.sh] Done!"
