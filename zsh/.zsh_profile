@@ -54,35 +54,26 @@ function tks() {
 }
 
 function fns() {
-  if [ ! -f package.json ]; then
-    echo -e "No package.json found" >&2
-    return 1
-  fi
-
-  local printCommand="false"
-  if [[ $1 == "-p" ]]; then
-    printCommand="true"
-    echo ">> Printing running script to prompt"
-    shift
-  else
-    echo ">> Executing script"
-    echo ">> use \`fns -p\` to print script to prompt"
-  fi
-
-  local script_name=$(jq '.scripts | keys[]' package.json -r \
-    | fzf -q "$1" --height=50% \
+  local script_name
+  if [ $# -eq 0 ]; then
+    [ ! -f package.json ] && (echo "No package.json found" && return 1)
+    script_name=$(jq '.scripts | keys[]' package.json -r \
+      | fzf -q "$1" --height=50% \
           --reverse \
           --preview-window "nohidden:70%" \
-          --prompt="Select a script: " \
           --preview="jq '.scripts.\"{}\"' package.json -r")
-  
-  if [ -n "$script_name" ]; then
-    if [[ "$printCommand" == "true" ]]; then
-      print -z "npm run $script_name"
-    else
+    if [ -n "$script_name" ]; then
       npm run $script_name
     fi
+  else
+    npm run "$@"
   fi
+}
+
+function _fzf_complete_fns() {
+  _fzf_complete --reverse -- "$@" < <(
+    jq '.scripts | keys[]' package.json -r
+  )
 }
 
 bindkey -s ^f 'tms\n'
