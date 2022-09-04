@@ -22,6 +22,7 @@ apt_packages=(
 )
 
 brew_packages=(
+  "${shared_packages[@]}"
   "fd"
   "fnm"
 )
