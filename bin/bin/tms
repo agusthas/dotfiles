@@ -1,66 +1,56 @@
 #!/usr/bin/env bash
 
-display_usage() {
-cat << EOF
-tms
-A simple bash script to manage workspaces sessions in tmux.
+get_workspace() {
+  if [[ $# -eq 1 ]]; then
+    workspace="$1" && [[ "$workspace" == "." ]] && workspace="$(pwd)"
+  else
+    local exact=(
+      "$HOME/dotfiles"
+    )
+    local recurse=(
+      "$HOME/sandbox"
+    )
 
-DEPENDENCIES: fzf, fd, tmux
+    workspaces=(
+      "${exact[@]}"
+      "$(fd -p . "${recurse[@]}" --max-depth=1 -t d)"
+    )
 
-ENVIRONMENT:
-  - WORKSPACES_LIST_PATH: path to workspaces list file.
+    workspace=$(
+      printf '%s\n' "${workspaces[@]}" \
+        | fzf --reverse --height=50% --no-info --prompt="Select a workspace: "
+    )
+  fi
 
-USAGE: tms WORKSPACE
-
-OPTIONS:
-  -h, --help
-    Display this help message.
-EOF
+  if [ -z "$workspace" ]; then
+    exit 0
+  fi
 }
-
-while getopts "h" OPTION; do
-  case "${OPTION}" in
-    h)
-      display_usage
-      exit 0
-      ;;
-    *)
-      display_usage
-      exit 1
-      ;;
-  esac
-done
-shift $((OPTIND - 1))
-
-LIST="${WORKSPACES_LIST_PATH:-""}"
 
 if ! type fzf fd >/dev/null; then
   exit 1
 fi
 
-if ! [ -s "$LIST" ]; then
-  echo "No workspaces list found." >&2
-  exit 1
-fi
-
-if [[ $# -eq 1 ]]; then
-  workspace="$1" && [[ "$workspace" == "." ]] && workspace="$(pwd)"
-else
-  # shellcheck disable=SC2046
-  workspace=$(fd -p . $(<"$LIST" xargs) --max-depth=1 -t d \
-    | fzf --reverse --height=50% --no-info --prompt="Select a workspace: ")
-fi
-
-if [ -z "$workspace" ]; then
-  exit 0
-fi
-
+get_workspace "$@"
 selected_name=$(basename "$workspace" | tr . _)
 
+# check if inside TMUX session
 if [[ -n "$TMUX" ]]; then
-  tmux switch-client -t "$selected_name" &>/dev/null \
-    || (tmux new-session -ds "$selected_name" -c "$workspace" && tmux switch-client -t "$selected_name")
-elif [[ -z "$TMUX" ]]; then
-  tmux new-session -s "$selected_name" -c "$workspace" &>/dev/null \
-    || tmux attach -t "$selected_name"
+  # check if session with selected name exists
+  if tmux has-session -t "$selected_name" 2>/dev/null; then
+    # attach to session
+    tmux attach -t "$selected_name"
+  else
+    # create new detached session and switch to it
+    tmux new-session -d -s "$selected_name" -c "$workspace" && tmux switch-client -t "$selected_name"
+  fi
+else
+  # check if session with selected name exists
+  if tmux has-session -t "$selected_name" 2>/dev/null; then
+    # attach to session
+    tmux attach -t "$selected_name"
+  else
+    # create new session
+    tmux new-session -s "$selected_name" -c "$workspace"
+  fi
 fi
