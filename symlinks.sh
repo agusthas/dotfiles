@@ -13,7 +13,6 @@ create_symlinks \
   zsh \
   git \
   tmux \
-  nvim \
   bin
 
 case "$(uname -s)" in

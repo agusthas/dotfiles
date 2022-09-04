@@ -84,11 +84,9 @@ source $ZSH/oh-my-zsh.sh
 # export LANG=en_US.UTF-8
 
 # Preferred editor
-if command -v nvim >/dev/null 2>&1; then
-  export EDITOR='nvim'
-else 
+if command -v vim >/dev/null 2>&1; then
   export EDITOR='vim'
-fi
+fi 
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"

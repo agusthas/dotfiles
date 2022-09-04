@@ -8,7 +8,6 @@ shared_packages=(
   "tmux"
   "git"
   "httpie"
-  "neovim"
   "stow"
   "fzf"
   "bat"
@@ -47,9 +46,6 @@ case "$(uname -s)" in
   echo "PRE COMMANDS"
   # git
   sudo add-apt-repository --no-update -y ppa:git-core/ppa
-
-  # neovim
-  sudo add-apt-repository --no-update -y ppa:neovim-ppa/stable
 
   # httpie
   echo && echo "Adding httpie sources list"
