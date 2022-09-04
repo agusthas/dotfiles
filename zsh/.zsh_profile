@@ -25,9 +25,7 @@ function _fzf_compgen_dir() {
 
 ## -- ALIASES --
 alias :q="exit"
-alias getrandom='openssl rand -base64 32'
-alias gcm="git commit -m"
-alias lg='lazygit'
+# alias getrandom='openssl rand -base64 32'
 
 ## -- FUNCTIONS --
 function cap() { tee /tmp/capture.out; }
@@ -87,33 +85,4 @@ function fns() {
   fi
 }
 
-# Docker
-# remove image include multi options
-function drmi() {
-  docker images |
-    fzf -q "$1" --header-lines=1 --no-sort -m --tac --prompt="Choose image(s) to remove: " |
-    awk '{print $3}' |
-    xargs -I {} docker rmi {}
-}
-
-# remove volume include multi options
-function drmv() {
-  docker volume ls |
-    fzf -q "$1" --header-lines=1 --no-sort -m --tac --prompt="Choose volume(s) to remove: " |
-    awk {'print $2'} |
-    xargs -I {} docker volume rm {}
-}
-
-# Remove commented command from history
-function zshaddhistory() {
-  emulate -L zsh
-  if ! [[ "$1" =~ "(^ |^clear|^fns)" ]]; then
-    print -sr -- "${1%%$'\n'}"
-    fc -p
-  else
-    return 1
-  fi
-}
-
-bindkey '^[#' pound-insert
 bindkey -s ^f 'tms\n'
