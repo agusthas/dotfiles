@@ -17,6 +17,15 @@ parse_args() {
         skip_symlinks="true"
         shift # past argument
         ;;
+      --skip-extras)
+        skip_extras="true"
+        shift # past argument
+        ;;
+      --symlinks)
+        skip_base="true"
+        skip_extras="true"
+        shift # past argument
+        ;;
     esac
   done
 }
@@ -66,11 +75,6 @@ base_install() {
     echo "PRE COMMANDS"
     # git
     sudo add-apt-repository --no-update -y ppa:git-core/ppa
-
-    # httpie
-    echo && echo "Adding httpie sources list"
-    curl -SsL https://packages.httpie.io/deb/KEY.gpg | sudo gpg --dearmor --yes -o /etc/apt/keyrings/httpie.gpg
-    echo "deb [signed-by=/etc/apt/keyrings/httpie.gpg] https://packages.httpie.io/deb ./" | sudo tee /etc/apt/sources.list.d/httpie.list >/dev/null
 
     # Installing base dependencies
     echo && echo "Installing dependencies..."
