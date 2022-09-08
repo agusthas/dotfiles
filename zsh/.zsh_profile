@@ -53,26 +53,27 @@ function tks() {
   fi
 }
 
-function fns() {
-  local script_name
+# npr
+# Helper to run npm scripts, with fzf completion
+function npr() {
   if [ $# -eq 0 ]; then
-    [ ! -f package.json ] && (echo "No package.json found" && return 1)
-    script_name=$(jq '.scripts | keys[]' package.json -r \
-      | fzf -q "$1" --height=50% \
-          --reverse \
-          --preview-window "nohidden:70%" \
-          --preview="jq '.scripts.\"{}\"' package.json -r")
-    if [ -n "$script_name" ]; then
-      npm run $script_name
-    fi
+    echo "Usage: npr <script>" 2>&1
+    return 1
   else
-    npm run "$@"
+    npm run $@
   fi
 }
 
-function _fzf_complete_fns() {
-  _fzf_complete --reverse -- "$@" < <(
-    jq '.scripts | keys[]' package.json -r
+_fzf_complete_npr() {
+  setopt local_options no_aliases
+  local package="./package.json"
+
+  if [[ ! -f $package ]]; then
+    return
+  fi
+
+  _fzf_complete --tiebreak=index -- "$@" < <(
+    jq '.scripts | keys[]' $package -r 2>/dev/null
   )
 }
 
