@@ -38,7 +38,6 @@ base_install() {
     "git"
     "stow"
     "fzf"
-    "bat"
   )
 
   local apt_packages=(
@@ -48,6 +47,7 @@ base_install() {
     "p7zip-full"
     "p7zip-rar"
     "fd-find"
+    "bat"
   )
 
   local brew_packages=(
