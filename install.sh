@@ -33,7 +33,7 @@ parse_args() {
 base_install() {
   local shared_packages=(
     "zsh"
-    "jq"
+    "gojq"
     "tmux"
     "git"
     "stow"
@@ -185,8 +185,7 @@ create_symlinks() {
   $cmd \
     zsh \
     git \
-    tmux \
-    bin
+    tmux
   
   if [ "$OS" = "Linux" ]; then
     $cmd ubuntu 
