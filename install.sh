@@ -138,30 +138,8 @@ setup_ohmyzsh() {
   if [ ! -d "$omz_install_dir" ]; then
     git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git "$omz_install_dir"
   else
-    echo "[INFO]" "updating oh-my-zsh"
-    zsh -ic 'omz update' 2>&1 >/dev/null
+    echo "[INFO]" "zsh already installed, please run omz update!"
   fi
-
-  echo "Installing zsh plugins and themes..."
-  omz_custom_dir="$omz_install_dir/custom"
-
-  echo "[INFO]" "p10k"
-  p10k_install_dir="$omz_custom_dir/themes/powerlevel10k"
-  git_pull_or_clone \
-    https://github.com/romkatv/powerlevel10k.git \
-    "$p10k_install_dir"
-
-  echo "[INFO]" "zsh-autosuggestions"
-  zsh_autosuggest_install_dir="$omz_custom_dir/plugins/zsh-autosuggestions"
-  git_pull_or_clone \
-    https://github.com/zsh-users/zsh-autosuggestions \
-    "$zsh_autosuggest_install_dir"
-
-  echo "[INFO]" "zsh-syntax-highlighting"
-  zsh_syntax_install_dir="$omz_custom_dir/plugins/zsh-syntax-highlighting"
-  git_pull_or_clone \
-    https://github.com/zsh-users/zsh-syntax-highlighting.git \
-    "$zsh_syntax_install_dir"
 }
 
 setup_ohmytmux() {
