@@ -1,16 +1,7 @@
 [user]
   name = SusuMantan
   email = suzumantan@gmail.com
-[core]
-  editor = "if which code > /dev/null; then ED='code --wait'; else ED=$EDITOR; fi; $ED"
-	excludesFile = ~/.gitignore
-[diff]
-  tool = default-difftool
-[alias]
-  lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset' --abbrev-commit --date=relative
-[difftool "default-difftool"]
-  cmd = code --wait --diff $LOCAL $REMOTE
 [init]
-	defaultBranch = main
+  defaultBranch = main
 [includeIf "gitdir:~/koyoi/"]
   path = ~/koyoi/.gitconfig
