@@ -42,6 +42,7 @@ base_install() {
 
   local apt_packages=(
     "${shared_packages[@]}"
+    "curl"
     "zip"
     "unzip"
     "p7zip-full"
@@ -84,6 +85,7 @@ base_install() {
 
     # post-commands for several packages
     echo && echo "POST COMMANDS"
+    mkdir -p ~/bin
     # bat
     echo "[INFO] Creating batcat alias..."
     ln -s $(which batcat) ~/bin/bat
