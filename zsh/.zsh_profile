@@ -25,6 +25,8 @@ function _fzf_compgen_dir() {
 
 ## -- ALIASES --
 alias :q="exit"
+alias gl="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
+alias gca="git commit --all --verbose --message"
 # alias getrandom='openssl rand -base64 32'
 
 ## -- FUNCTIONS --
