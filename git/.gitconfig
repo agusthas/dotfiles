@@ -3,9 +3,5 @@
   email = suzumantan@gmail.com
 [init]
   defaultBranch = main
-[github]
-  user = "agusthas"
-[core]
-  sshCommand = "ssh -i ~/.ssh/id_ed25519"
 [includeIf "gitdir:~/koyoi/"]
   path = ~/koyoi/.gitconfig
