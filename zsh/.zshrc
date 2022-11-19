@@ -8,10 +8,10 @@ export ZSH="$HOME/.oh-my-zsh"
 # for ZSH
 case "$OSTYPE" in
   darwin*)
-    ZSH_THEME="robbyrussell"
+    ZSH_THEME="lukerandall"
   ;;
   linux*)
-    ZSH_THEME="lukerandall"
+    ZSH_THEME="kphoen"
   ;;
   dragonfly*|freebsd*|netbsd*|openbsd*)
     ZSH_THEME="eastwood"
