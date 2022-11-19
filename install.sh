@@ -165,7 +165,8 @@ create_symlinks() {
   $cmd \
     zsh \
     git \
-    tmux
+    tmux \
+    vim
   
   if [ "$OS" = "Linux" ]; then
     $cmd ubuntu 
