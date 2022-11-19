@@ -1,6 +1,10 @@
 " Don't try to be vi compatible
 set nocompatible
 
+" No backup nor swaps
+set nobackup
+set noswapfile
+
 " Helps force plugins to load correctly when it is turned back on below
 filetype off
 
