@@ -9,6 +9,22 @@ set noswapfile
 filetype off
 
 " TODO: Load plugins here (pathogen or vundle)
+if has('unix')
+  if has('mac')
+  else
+    let data_dir = '~/.vim'
+    if empty(glob(data_dir . '/autoload/plug.vim'))
+      silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+      autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+    endif
+
+    call plug#begin()
+      Plug 'tpope/vim-commentary'
+      Plug 'tpope/vim-surround'
+      Plug 'markonm/traces.vim'
+    call plug#end()
+  endif
+endif
 
 " Turn on syntax highlighting
 syntax on
@@ -76,11 +92,6 @@ set ignorecase
 set smartcase
 set showmatch
 map <leader><space> :let @/=''<cr> " clear search
-
-" Remap help key.
-inoremap <F1> <ESC>:set invfullscreen<CR>a
-nnoremap <F1> :set invfullscreen<CR>
-vnoremap <F1> :set invfullscreen<CR>
 
 " Textmate holdouts
 
