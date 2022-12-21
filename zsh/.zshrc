@@ -4,7 +4,7 @@ export ZSH="$HOME/.oh-my-zsh"
 plugins=(fzf)
 case "$OSTYPE" in
   darwin*)
-    ZSH_THEME="lukerandall"
+    ZSH_THEME="kphoen"
   ;;
   linux*)
     ZSH_THEME="kphoen"
