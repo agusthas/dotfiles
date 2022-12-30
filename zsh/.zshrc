@@ -7,7 +7,7 @@ case "$OSTYPE" in
     ZSH_THEME="kphoen"
   ;;
   linux*)
-    ZSH_THEME="kphoen"
+    ZSH_THEME="eastwood"
     plugins+=(extract)
   ;;
   dragonfly*|freebsd*|netbsd*|openbsd*)
