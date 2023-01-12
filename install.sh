@@ -144,17 +144,6 @@ setup_ohmyzsh() {
   fi
 }
 
-setup_ohmytmux() {
-  echo "Setting up oh-my-tmux"
-
-  echo "[INFO]" "oh-my-tmux"
-  omt_install_dir="$HOME/.oh-my-tmux"
-  git_pull_or_clone \
-    https://github.com/gpakosz/.tmux \
-    "$omt_install_dir" \
-    && ln -s -f "$omt_install_dir/.tmux.conf" "$HOME/.tmux.conf"
-}
-
 create_symlinks() {
   echo "Creating symlinks"
 
@@ -180,7 +169,6 @@ parse_args "$@"
 [ "$skip_symlinks" != "true" ] && create_symlinks
 if [ "$skip_extras" != "true" ]; then
   setup_ohmyzsh
-  setup_ohmytmux
 fi
 
 echo "[install.sh] Done!"
