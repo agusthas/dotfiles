@@ -4,17 +4,6 @@
 typeset -U path
 path+=($HOME/bin)
 
-export FZF_DEFAULT_OPTS="
---bind '?:toggle-preview,ctrl-d:preview-down,ctrl-u:preview-up'
-"
-export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS"
---prompt='❯ '
---pointer='-'
---marker='+'
---tabstop=4
---color=dark
---color=hl:2:bold,fg+:4:bold,bg+:-1,hl+:2:bold,info:3:bold,border:8,prompt:2,pointer:5,marker:1,header:6
-"
 export FZF_COMPLETION_TRIGGER=','
 function _fzf_compgen_path() {
   fd --hidden --follow --exclude ".git" . "$1"
@@ -29,12 +18,6 @@ alias ga="git add"
 alias gba="git branch -a"
 alias gst="git status"
 alias gc="git commit -v"
-alias gco="git checkout"
-alias gsw="git switch"
-alias gswc="git switch -c"
-alias gpush="git push"
-alias gl="git pull"
-alias grs="git restore"
 alias groot='cd "$(git rev-parse --show-toplevel || echo .)"'
 alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
 alias gunwip='git log -n 1 | grep -q -c "\--wip--" && git reset HEAD~1'
@@ -57,8 +40,7 @@ function n() {
     return
   fi
 
-  export NNN_PLUG='c:-!&code $nnn'
-  export NNN_BMS="D:$HOME/Downloads;k:$HOME/koyoi;p:$HOME/p;s:$HOME/sandbox"
+  export NNN_BMS="D:$HOME/Downloads;k:$HOME/koyoi;p:$HOME/p;s:$HOME/sandbox;h:$HOME"
 
   # The behaviour is set to cd on quit (nnn checks if NNN_TMPFILE is set)
   # If NNN_TMPFILE is set to a custom path, it must be exported for nnn to
