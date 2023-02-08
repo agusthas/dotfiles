@@ -22,7 +22,11 @@ if has('unix')
       Plug 'tpope/vim-commentary'
       Plug 'tpope/vim-surround'
       Plug 'markonm/traces.vim'
+      Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+      Plug 'junegunn/fzf.vim'
     call plug#end()
+    " Map Ctrl + p to open fuzzy find (FZF)
+    nnoremap <c-p> :Files<cr>
   endif
 endif
 
@@ -108,4 +112,25 @@ map <leader>l :set list!<CR> " Toggle tabs and EOL
 " Color scheme (terminal)
 set t_Co=256
 set background=dark
-silent! colorscheme habamax
+
+if has('unix')
+  if has('mac')
+    silent! colorscheme habamax
+  else
+    silent! colorscheme default
+    set wildmode=list:longest,list:full
+    function! InsertTabWrapper()
+        let col = col('.') - 1
+        if !col || getline('.')[col - 1] !~ '\k'
+            return "\<Tab>"
+        else
+            return "\<C-p>"
+        endif
+    endfunction
+    inoremap <Tab> <C-r>=InsertTabWrapper()<CR>
+    inoremap <S-Tab> <C-n>
+
+    " Numbers
+    set numberwidth=5
+  endif
+endif
