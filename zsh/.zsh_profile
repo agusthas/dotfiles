@@ -25,9 +25,6 @@ alias glog="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset
 # alias getrandom='openssl rand -base64 32'
 
 ## -- FUNCTIONS --
-function cap() { tee /tmp/capture.out; }
-function ret() { cat /tmp/capture.out; }
-
 function n() {
   if ! type nnn > /dev/null 2>&1; then
     echo "nnn is not installed"
