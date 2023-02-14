@@ -1,6 +1,0 @@
-#!/usr/bin/env zsh
-
-# ! DO NOT SYMLINK THIS FILE !
-# This is a local zsh_profile file.
-# It is sourced in the .zshrc file after the global .zsh_profile file.
-# Put your local configuration here.
