@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+dir="~/work ~/sandbox ~"
+
+if ! type fzf > /dev/null 2>&1; then
+  echo "fzf is not installed"
+  exit 1
+fi
+
+if ! type fd > /dev/null 2>&1; then
+  cmd="find $dir -maxdepth 1 -maxdepth 1"
+else
+  cmd="fd . $dir --max-depth 1"
+fi
+
+selected=$(eval $cmd | fzf --height 40% --reverse --query "$1" --exit-0)
+
+if [ -z "$selected" ]; then
+  exit 0
+fi
+
+tmux_session_name=$(basename $selected | tr '.' '_')
+tmux_running=$(pgrep tmux)
+
+if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
+  tmux new-session -s $tmux_session_name -c $selected
+  exit 0
+fi
+
+if ! tmux has-session -t=$tmux_session_name 2> /dev/null; then
+  tmux new-session -ds $tmux_session_name -c $selected
+fi
+
+if [[ -z $TMUX ]]; then
+  tmux attach-session -t $tmux_session_name
+else
+  tmux switch-client -t $tmux_session_name
+fi
