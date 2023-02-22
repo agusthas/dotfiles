@@ -1,5 +1,5 @@
 # Set a fast keyboard repeat rate
-defaults write -g InitialKeyRepeat -int 10
+defaults write -g InitialKeyRepeat -int 25
 defaults write -g KeyRepeat -int 2
 
 # Enable key repeat
