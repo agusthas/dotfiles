@@ -8,7 +8,7 @@ if ! type fzf > /dev/null 2>&1; then
 fi
 
 if ! type fd > /dev/null 2>&1; then
-  cmd="find $dir -maxdepth 1 -maxdepth 1"
+  cmd="find $dir -mindepth 1 -maxdepth 1"
 else
   cmd="fd . $dir --max-depth 1"
 fi
