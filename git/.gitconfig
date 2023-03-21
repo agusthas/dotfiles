@@ -5,3 +5,5 @@
   defaultBranch = main
 [includeIf "gitdir:~/koyoi/"]
   path = ~/koyoi/.gitconfig
+[includeIf "gitdir:~/work/"]
+  path = ~/work/.gitconfig
