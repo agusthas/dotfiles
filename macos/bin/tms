@@ -8,12 +8,19 @@ if ! type fzf > /dev/null 2>&1; then
 fi
 
 if ! type fd > /dev/null 2>&1; then
-  cmd="find $dir -mindepth 1 -maxdepth 1"
-else
-  cmd="fd . $dir --max-depth 1"
+  echo "fd is not installed"
+  exit 1
 fi
 
-selected=$(eval $cmd | fzf --height 40% --reverse --query "$1" --exit-0)
+selected=$(
+  FZF_DEFAULT_COMMAND="fd . $dir --max-depth 1 --type d" \
+  fzf --bind 'ctrl-w:reload(fd . ~/work --max-depth 1 --type d),ctrl-s:reload(fd . ~/sandbox --max-depth 1 --type d),ctrl-f:reload(eval "$FZF_DEFAULT_COMMAND")' \
+  --header "Ctrl-W: Work, Ctrl-S: Sandbox, Ctrl-F: Home" \
+  --height 40% \
+  --reverse \
+  --query "$1" \
+  --exit-0
+)
 
 if [ -z "$selected" ]; then
   exit 0
