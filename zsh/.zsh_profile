@@ -24,7 +24,9 @@ alias gunwip='git log -n 1 | grep -q -c "\--wip--" && git reset HEAD~1'
 alias glog="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
 alias gsw="git switch"
 alias gfo="git fetch origin"
+alias gco="git checkout"
 alias gundo="git reset --soft HEAD~1"
+alias gpristine='git reset --hard && git clean --force -dfx'
 # alias getrandom='openssl rand -base64 32'
 
 ## -- FUNCTIONS --
