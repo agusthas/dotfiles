@@ -86,25 +86,26 @@ base_install() {
     # post-commands for several packages
     echo && echo "POST COMMANDS"
     mkdir -p ~/bin
-    # bat
-    echo "[INFO] Creating batcat alias..."
-    ln -s $(which batcat) ~/bin/bat
-
-    # fd
-    echo "[INFO] Creating fdfind alias..."
-    ln -s $(which fdfind) ~/bin/fd
-
-    # fnm
-    if ! type fnm >/dev/null; then
-      echo "[INFO] Installing fnm..."
-      curl -fsSL https://fnm.vercel.app/install | bash -s -- --install-dir "$HOME/bin" --skip-shell
-    fi
 
     if ! echo "$SHELL" | grep -q "zsh"; then
       echo "Please manually change shell to zsh."
       echo "You can do this by running:"
       echo "  chsh -s \$(which zsh)"
       exit 1
+    else
+      # bat
+      echo "[INFO] Creating batcat alias..."
+      ln -s $(which batcat) ~/bin/bat
+
+      # fd
+      echo "[INFO] Creating fdfind alias..."
+      ln -s $(which fdfind) ~/bin/fd
+      
+      # fnm
+      if ! type fnm >/dev/null; then
+        echo "[INFO] Installing fnm..."
+        curl -fsSL https://fnm.vercel.app/install | bash -s -- --install-dir "$HOME/bin" --skip-shell
+      fi
     fi
     ;;
   'Darwin')
