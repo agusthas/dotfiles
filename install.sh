@@ -33,7 +33,6 @@ parse_args() {
 base_install() {
   local shared_packages=(
     "zsh"
-    "gojq"
     "tmux"
     "git"
     "stow"
@@ -49,6 +48,7 @@ base_install() {
     "p7zip-rar"
     "fd-find"
     "bat"
+    "gojq"
   )
 
   local brew_packages=(
