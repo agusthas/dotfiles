@@ -145,6 +145,21 @@ setup_ohmyzsh() {
   fi
 }
 
+# Extra plugins
+setup_fzfgit() {
+  echo "Setting up fzf-git"
+
+  echo "[INFO]" "fzf-git"
+  fzf_git_dir="$HOME/.fzf-git"
+
+  if [ ! -d "$fzf_git_dir" ]; then
+    git clone --depth=1 https://github.com/junegunn/fzf-git.sh.git "$fzf_git_dir"
+  else
+    # pull latest
+    git -C "$fzf_git_dir" pull --rebase --force
+  fi
+}
+
 create_symlinks() {
   echo "Creating symlinks"
 
@@ -170,6 +185,7 @@ parse_args "$@"
 [ "$skip_symlinks" != "true" ] && create_symlinks
 if [ "$skip_extras" != "true" ]; then
   setup_ohmyzsh
+  setup_fzfgit
 fi
 
 echo "[install.sh] Done!"
