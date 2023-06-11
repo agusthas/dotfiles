@@ -12,6 +12,16 @@ function _fzf_compgen_dir() {
   fd --type d --hidden --follow --exclude ".git" . "$1"
 }
 
+export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS"
+--prompt='❯ '
+--pointer='-'
+--marker='+'
+--tabstop=4
+--color=dark
+--color=hl:2:bold,fg+:4:bold,bg+:-1,hl+:2:bold,info:3:bold,border:8,prompt:2,pointer:5,marker:1,header:6
+--bind 'ctrl-s:toggle,tab:down,btab:up,ctrl-d:preview-down,ctrl-u:preview-up'
+"
+
 ## -- ALIASES --
 alias :q="exit"
 alias ga="git add"
