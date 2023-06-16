@@ -43,6 +43,16 @@ alias gpristine='git reset --hard && git clean --force -dfx'
 if [[ -f ~/.fzf-git/fzf-git.sh ]]; then
   source ~/.fzf-git/fzf-git.sh
 
+  # Mac terminal ctrl-/ is not working
+  _fzf_git_fzf() {
+    fzf-tmux -p80%,60% -- \
+      --layout=reverse --multi --height=50% --min-height=20 --border \
+      --border-label-pos=2 \
+      --color='header:italic:underline,label:blue' \
+      --preview-window='right,50%,border-left' \
+      --bind='ctrl-r:change-preview-window(down,50%,border-top|hidden|)' "$@"
+  }
+
   gco() {
     local selected=$(_fzf_git_each_ref --no-multi)
     [ -n "$selected" ] && git checkout "$selected"
