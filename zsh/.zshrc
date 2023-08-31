@@ -15,8 +15,9 @@ case "$OSTYPE" in
   ;;
 esac
 
-export FZF_DEFAULT_COMMAND="fd --type f --strip-cwd-prefix --hidden --follow --exclude .git"
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND --exclude node_modules"
+# equivalent command with bfs
+export FZF_DEFAULT_COMMAND="bfs -type f -follow -exclude -name .git"
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND -exclude -name node_modules"
 
 source $ZSH/oh-my-zsh.sh
 
