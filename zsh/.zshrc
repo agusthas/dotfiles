@@ -35,6 +35,7 @@ fi
 # export ARCHFLAGS="-arch x86_64"
 
 source ~/.zsh_profile
+# If you need to have a local .zsh_profile, create ~/.zsh_profile.local on your home directory
 [[ ! -f ~/.zsh_profile.local ]] || source ~/.zsh_profile.local
 
 # fnm
