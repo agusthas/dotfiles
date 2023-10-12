@@ -3,6 +3,8 @@
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 OS=$(uname -s)
 
+[ OS = "Linux" ] && echo "LINUX NOT SUPPORTED YET" && exit 1
+
 # Parse Flags
 parse_args() {
   while [[ $# -gt 0 ]]; do
@@ -53,8 +55,8 @@ base_install() {
 
   local brew_packages=(
     "${shared_packages[@]}"
-    "fd"
     "fnm"
+    "bfs"
   )
 
   # Generate ASCII Text
@@ -132,38 +134,11 @@ git_pull_or_clone() {
   fi
 }
 
-setup_ohmyzsh() {
-  echo "Setting up ohmyzsh"
-
-  echo "[INFO]" "oh-my-zsh"
-  omz_install_dir="$HOME/.oh-my-zsh"
-
-  if [ ! -d "$omz_install_dir" ]; then
-    git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git "$omz_install_dir"
-  else
-    echo "[INFO]" "zsh already installed, please run omz update!"
-  fi
-}
-
-# Extra plugins
-setup_fzfgit() {
-  echo "Setting up fzf-git"
-
-  echo "[INFO]" "fzf-git"
-  fzf_git_dir="$HOME/.fzf-git"
-
-  if [ ! -d "$fzf_git_dir" ]; then
-    git clone --depth=1 https://github.com/junegunn/fzf-git.sh.git "$fzf_git_dir"
-  else
-    # pull latest
-    git -C "$fzf_git_dir" pull --rebase --force
-  fi
-}
-
 create_symlinks() {
   echo "Creating symlinks"
 
-  local cmd="stow -d $SCRIPT_DIR -t $HOME --verbose=1"
+  # Stow --no-folding means that it will not create parent directories
+  local cmd="stow -d $SCRIPT_DIR -t $HOME --no-folding --verbose=1"
 
   mkdir -p "$HOME/bin" "$HOME/.config"
 
@@ -183,9 +158,9 @@ create_symlinks() {
 parse_args "$@"
 [ "$skip_base" != "true" ] && base_install
 [ "$skip_symlinks" != "true" ] && create_symlinks
-if [ "$skip_extras" != "true" ]; then
-  setup_ohmyzsh
-  setup_fzfgit
-fi
+# if [ "$skip_extras" != "true" ]; then
+#   setup_ohmyzsh
+#   setup_fzfgit
+# fi
 
 echo "[install.sh] Done!"
