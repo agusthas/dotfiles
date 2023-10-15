@@ -37,10 +37,8 @@ setopt HIST_SAVE_NO_DUPS         # Don't write duplicate entries in the history 
 setopt HIST_REDUCE_BLANKS        # Remove superfluous blanks before recording entry.
 setopt HIST_VERIFY               # Don't execute immediately upon history expansion.
 
-autoload -U up-line-or-beginning-search
-autoload -U down-line-or-beginning-search
-zle -N up-line-or-beginning-search
-zle -N down-line-or-beginning-search
+autoload -U edit-command-line
+zle -N edit-command-line
 
 # Colors
 autoload -Uz colors && colors
@@ -49,6 +47,13 @@ autoload -Uz colors && colors
 export PATH="$HOME/.local/bin:$PATH"
 
 # bindings
+
+# Use emacs key bindings
+bindkey -e
+bindkey '^xe' edit-command-line
+bindkey '^x^e' edit-command-line
+
+bindkey -M menuselect '^[[Z' reverse-menu-complete
 # bindkey -s '^x' '^usource $ZSHRC\n'
 # bindkey -M menuselect '?' history-incremental-search-forward
 # bindkey -M menuselect '/' history-incremental-search-backward
