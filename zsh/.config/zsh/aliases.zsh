@@ -20,10 +20,17 @@ alias gc="git commit -v"
 alias groot='cd "$(git rev-parse --show-toplevel || echo .)"'
 alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commit --no-verify --no-gpg-sign -m "--wip-- [skip ci]"'
 alias gunwip='git log -n 1 | grep -q -c "\--wip--" && git reset HEAD~1'
-alias glog="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
-alias gsw="git switch"
+alias glog="git log --oneline --graph --pretty=format:'%Cred%h%Creset%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'"
 alias gfo="git fetch origin"
-# alias gundo="git reset --soft HEAD~1"
+alias gclean="git reset --hard HEAD && git clean -df"
 alias gpristine='git reset --hard && git clean --force -dfx'
+
+gsw() {
+  if typeset -f _fzf_git_branches > /dev/null; then
+    _fzf_git_branches --no-multi --query="$1" | sed 's/^origin\///' | xargs git switch
+  else
+    git switch "$@"
+  fi
+}
 
 # alias getrandom='openssl rand -base64 32' 

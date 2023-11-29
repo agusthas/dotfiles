@@ -24,8 +24,5 @@ export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS"
 --tabstop=4
 --color=dark
 --color=hl:2:bold,fg+:4:bold,bg+:-1,hl+:2:bold,info:3:bold,border:8,prompt:2,pointer:5,marker:1,header:6
---bind 'ctrl-s:toggle,tab:down,btab:up,ctrl-d:preview-down,ctrl-u:preview-up'
+--bind 'ctrl-alt-d:preview-down,ctrl-alt-u:preview-up,ctrl-d:page-down,ctrl-u:page-up,::jump'
 "
-
-# bind ctrl+f to run script command from ~/bin/tms
-bindkey -s '^f' '~/bin/tms\n'
