@@ -1,24 +1,27 @@
 #!/usr/bin/env bash
 
-dir="~/work ~/sandbox ~"
-
 if ! type fzf > /dev/null 2>&1; then
   echo "fzf is not installed"
   exit 1
 fi
 
-# Check if bfs installed, if installed set FZF_DEFAULT_COMMAND to bfs
+dir_to_be_searched="$HOME/work $HOME/sandbox"
+
 if type bfs > /dev/null 2>&1; then
-  FZF_DEFAULT_COMMAND="bfs $dir -maxdepth 1 -type d -nohidden"
+  dir_list=$(bfs $dir_to_be_searched -maxdepth 1 -type d -nohidden)
 elif type fd > /dev/null 2>&1; then
-  FZF_DEFAULT_COMMAND="fd . $dir --max-depth 1 --type d"
+  dir_list=$(fd . $dir_to_be_searched --max-depth 1 --type d)
 else
-  FZF_DEFAULT_COMMAND="find $dir -maxdepth 1 -type d -not -path '*/.*'"
+  dir_list=$(find $dir_to_be_searched -maxdepth 1 -type d -not -path '*/.*')
 fi
 
+# Add dotfiles to the list
+dir_list=$(echo -e "$HOME/dotfiles\n$dir_list")
+
 selected=$(
-  fzf --header "Directory: $dir" \
-  --height 40% \
+  echo "$dir_list" | fzf-tmux -p50%,50% -- \
+  --height=40% --min-height=20 --border \
+  --border-label="tmux-sessionizer" \
   --reverse \
   --query "$1" \
   --exit-0
