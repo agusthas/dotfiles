@@ -10,6 +10,7 @@ alias egrep='egrep --color=auto'
 alias fgrep='fgrep --color=auto'
 
 alias :q="exit"
+alias c="code"
 
 # GIT
 alias g="git"

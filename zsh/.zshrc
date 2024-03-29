@@ -16,7 +16,7 @@ fi
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND -exclude -name node_modules"
 
 # FZF-GIT
-[ -d "$HOME/.config/zsh/plugins/fzf-git" ] && source "$HOME/.config/zsh/plugins/fzf-git/fzf-git.plugin.zsh"
+# [ -d "$HOME/.config/zsh/plugins/fzf-git" ] && source "$HOME/.config/zsh/plugins/fzf-git/fzf-git.plugin.zsh"
 
 # source $ZSH/oh-my-zsh.sh
 
@@ -30,8 +30,11 @@ source "$HOME/.config/zsh/profile.zsh"
 # If you need to have a local .zsh_profile, create ~/.zsh_profile.local on your home directory
 [[ ! -f ~/.zsh_profile.local ]] || source ~/.zsh_profile.local
 
-# fnm
-eval "$(fnm env --use-on-cd)"
-
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# Load Angular CLI autocompletion.
+# source <(ng completion script)
+
+# fnm
+eval "$(fnm env --use-on-cd)"
