@@ -27,4 +27,5 @@ alias gfo="git fetch origin"
 alias gclean="git reset --hard HEAD && git clean -df"
 alias gpristine='git reset --hard && git clean --force -dfx'
 
+# alias gitzip='git archive --format zip --output /tmp/latest.zip master'
 # alias getrandom='openssl rand -base64 32' 
