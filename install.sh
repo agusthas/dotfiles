@@ -19,10 +19,6 @@ parse_args() {
         skip_symlinks="true"
         shift # past argument
         ;;
-      --skip-extras)
-        skip_extras="true"
-        shift # past argument
-        ;;
       --symlinks)
         skip_base="true"
         skip_extras="true"
@@ -38,7 +34,7 @@ base_install() {
     "tmux"
     "git"
     "stow"
-    "fzf"
+    "bfs"
   )
 
   local apt_packages=(
@@ -46,11 +42,10 @@ base_install() {
     "curl"
     "zip"
     "unzip"
-    "p7zip-full"
-    "p7zip-rar"
     "fd-find"
     "bat"
     "gojq"
+    "ripgrep"
   )
 
   local brew_packages=(
@@ -88,7 +83,7 @@ base_install() {
 
     # post-commands for several packages
     echo && echo "POST COMMANDS"
-    mkdir -p ~/bin
+    mkdir -p ~/bin ~/work ~/sandbox
 
     if ! echo "$SHELL" | grep -q "zsh"; then
       echo "Please manually change shell to zsh."
@@ -103,12 +98,18 @@ base_install() {
       # fd
       echo "[INFO] Creating fdfind alias..."
       ln -s $(which fdfind) ~/bin/fd
-      
-      # fnm
-      if ! type fnm >/dev/null; then
-        echo "[INFO] Installing fnm..."
-        curl -fsSL https://fnm.vercel.app/install | bash -s -- --install-dir "$HOME/bin" --skip-shell
+
+      # fzf
+      if ! type fzf >/dev/null; then
+        echo "[INFO] Installing fzf..."
+        # installing fzf using git
+        git clone --depth=1 https://github.com/junegunn/fzf.git "${HOME}/.fzf"
+        "${HOME}/.fzf/install" --key-bindings --completion --no-update-rc
       fi
+
+      # starship
+      echo "[INFO] Installing starship..."
+      curl -sS https://starship.rs/install.sh | sh
     fi
     ;;
   'Darwin')
@@ -120,19 +121,6 @@ base_install() {
     exit 1
     ;;
   esac
-}
-
-git_pull_or_clone() {
-  local repo="$1"
-  local dir="$2"
-
-  if [[ -d "$dir" ]]; then
-    echo "[INFO] Pulling $repo..."
-    git -C "$dir" pull --rebase --force
-  else
-    echo "[INFO] Cloning $repo..."
-    git clone --depth=1 "$repo" "$dir"
-  fi
 }
 
 create_symlinks() {
@@ -160,9 +148,5 @@ create_symlinks() {
 parse_args "$@"
 [ "$skip_base" != "true" ] && base_install
 [ "$skip_symlinks" != "true" ] && create_symlinks
-# if [ "$skip_extras" != "true" ]; then
-#   setup_ohmyzsh
-#   setup_fzfgit
-# fi
 
 echo "[install.sh] Done!"
