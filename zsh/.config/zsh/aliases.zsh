@@ -15,6 +15,7 @@ alias c="code"
 # GIT
 alias g="git"
 alias ga="git add"
+alias gb="git branch"
 alias gba="git branch -a"
 alias gst="git status"
 alias gc="git commit -v"

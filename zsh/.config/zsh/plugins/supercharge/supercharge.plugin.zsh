@@ -64,5 +64,5 @@ bindkey -M menuselect '^[[Z' reverse-menu-complete
 # ls colors
 case "$OSTYPE" in
 	darwin*)  alias ls='ls -G' ;;
-	linux*)   alias ls='ls --color=auto' ;;
+	linux*)   alias ls='ls --color=auto --group-directories-first' ;;
 esac
