@@ -57,6 +57,7 @@ base_install() {
     "${shared_packages[@]}"
     "fnm"
     "bfs"
+    "starship"
   )
 
   # Generate ASCII Text
@@ -146,7 +147,8 @@ create_symlinks() {
     zsh \
     git \
     tmux \
-    vim
+    vim \
+    starship
   
   if [ "$OS" = "Linux" ]; then
     $cmd ubuntu 
