@@ -7,3 +7,5 @@
   path = ~/koyoi/.gitconfig
 [includeIf "gitdir:~/work/"]
   path = ~/work/.gitconfig
+[includeIf "gitdir:~/sandbox/"]
+  path = ~/sandbox/.gitconfig
