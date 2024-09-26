@@ -8,6 +8,9 @@ export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND -exclude -name node_modules"
 # FZF-GIT
 # [ -d "$HOME/.config/zsh/plugins/fzf-git" ] && source "$HOME/.config/zsh/plugins/fzf-git/fzf-git.plugin.zsh"
 
+# Git
+[ -d "$HOME/.config/zsh/plugins/git" ] && source "$HOME/.config/zsh/plugins/git/git.plugin.zsh"
+
 # Preferred editor
 if command -v vim >/dev/null 2>&1; then
   export EDITOR='vim'
