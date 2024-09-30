@@ -15,8 +15,7 @@ $git_metrics\
 $git_status\
 $cmd_duration\
 $line_break\
-$character
-"""
+$character"""
 
 # Disable the package module, hiding it from the prompt completely
 [package]
