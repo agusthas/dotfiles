@@ -22,7 +22,12 @@ source "$HOME/.config/zsh/profile.zsh"
 [[ ! -f ~/.zsh_profile.local ]] || source ~/.zsh_profile.local
 
 # fnm
-eval "$(fnm env --use-on-cd)"
+FNM_PATH="$HOME/.local/share/fnm"
+if [ -d "$FNM_PATH" ]; then
+  export PATH="$HOME/.local/share/fnm:$PATH"
+  eval "`fnm env`"
+fi
 
 # starship
 eval "$(starship init zsh)"
+
