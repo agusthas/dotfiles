@@ -8,27 +8,27 @@ set noswapfile
 " Helps force plugins to load correctly when it is turned back on below
 filetype off
 
-" TODO: Load plugins here (pathogen or vundle)
-if has('unix')
-  if has('mac')
-  else
-    let data_dir = '~/.vim'
-    if empty(glob(data_dir . '/autoload/plug.vim'))
-      silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-      autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
-    endif
+" " TODO: Load plugins here (pathogen or vundle)
+" if has('unix')
+"   if has('mac')
+"   else
+"     let data_dir = '~/.vim'
+"     if empty(glob(data_dir . '/autoload/plug.vim'))
+"       silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+"       autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+"     endif
 
-    call plug#begin()
-      Plug 'tpope/vim-commentary'
-      Plug 'tpope/vim-surround'
-      Plug 'markonm/traces.vim'
-      Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-      Plug 'junegunn/fzf.vim'
-    call plug#end()
-    " Map Ctrl + p to open fuzzy find (FZF)
-    nnoremap <c-p> :Files<cr>
-  endif
-endif
+"     call plug#begin()
+"       Plug 'tpope/vim-commentary'
+"       Plug 'tpope/vim-surround'
+"       Plug 'markonm/traces.vim'
+"       Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+"       Plug 'junegunn/fzf.vim'
+"     call plug#end()
+"     " Map Ctrl + p to open fuzzy find (FZF)
+"     nnoremap <c-p> :Files<cr>
+"   endif
+" endif
 
 " Turn on syntax highlighting
 syntax on
@@ -117,20 +117,6 @@ if has('unix')
   if has('mac')
     silent! colorscheme habamax
   else
-    silent! colorscheme default
-    set wildmode=list:longest,list:full
-    function! InsertTabWrapper()
-        let col = col('.') - 1
-        if !col || getline('.')[col - 1] !~ '\k'
-            return "\<Tab>"
-        else
-            return "\<C-p>"
-        endif
-    endfunction
-    inoremap <Tab> <C-r>=InsertTabWrapper()<CR>
-    inoremap <S-Tab> <C-n>
-
-    " Numbers
-    set numberwidth=5
+    silent! colorscheme elflord
   endif
 endif
