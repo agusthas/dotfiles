@@ -1,3 +1,7 @@
+function git_current_branch() {
+  command git rev-parse --abbrev-ref HEAD
+}
+
 function git_develop_branch() {
   command git rev-parse --git-dir &>/dev/null || return
   local branch
@@ -64,6 +68,7 @@ alias gwtls='git worktree list'
 alias gwtmv='git worktree move'
 alias gwtrm='git worktree remove'
 
+alias groll='git reset --hard origin/$(git_current_branch)'
 alias gclean="git reset --hard HEAD && git clean -df"
 alias gpristine='git reset --hard && git clean --force -dfx'
 
