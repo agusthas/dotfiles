@@ -106,6 +106,13 @@ base_install() {
         git clone --depth=1 https://github.com/junegunn/fzf.git "${HOME}/.fzf"
         "${HOME}/.fzf/install" --key-bindings --completion --no-update-rc
       fi
+      
+      # fnm
+      FNM_PATH="$HOME/.local/share/fnm"
+      if [ -d "$FNM_PATH" ]; then
+        echo "[INFO] Installing fnm..."
+        curl -fsSL https://fnm.vercel.app/install | bash -s -- --install-dir "$HOME/.local/share/fnm" --skip-shell
+      fi
 
       # starship
       echo "[INFO] Installing starship..."
