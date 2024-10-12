@@ -136,7 +136,8 @@ create_symlinks() {
     git \
     tmux \
     vim \
-    starship
+    starship \
+    scripts
   
   if [ "$OS" = "Linux" ]; then
     $cmd ubuntu 
