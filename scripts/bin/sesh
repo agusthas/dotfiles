@@ -15,11 +15,16 @@ else
   dir_list=$(find $dir_to_be_searched -maxdepth 1 -type d -not -path '*/.*')
 fi
 
-# Add dotfiles to the list
-dir_list=$(echo -e "$HOME/dotfiles\n$dir_list")
+# list directories from zoxide and append to the list
+if type zoxide >/dev/null 2>&1; then
+  dir_list=$(echo -e "$dir_list\n$(zoxide query --list)")
+fi
+
+# sort the list alphabetically and unique
+dir_list=$(echo -e "$dir_list" | sort | uniq)
 
 selected=$(
-  echo "$dir_list" | fzf-tmux -p50%,50% -- \
+  echo "$dir_list" | fzf-tmux -p80%,50% -- \
   --height=40% --min-height=20 --border \
   --border-label="tmux-sessionizer" \
   --reverse \
