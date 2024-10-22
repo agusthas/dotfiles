@@ -53,6 +53,7 @@ base_install() {
     "fnm"
     "bfs"
     "starship"
+    "zoxide"
   )
 
   # Generate ASCII Text
@@ -107,6 +108,12 @@ base_install() {
         "${HOME}/.fzf/install" --key-bindings --completion --no-update-rc
       fi
       
+      # zoxide (needs FZF)
+      if ! type zoxide >/dev/null; then
+        echo "[INFO] Installing zoxide..."
+        curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+      fi
+
       # fnm
       FNM_PATH="$HOME/.local/share/fnm"
       if [ -d "$FNM_PATH" ]; then

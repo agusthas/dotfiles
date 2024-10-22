@@ -28,6 +28,8 @@ if [ -d "$FNM_PATH" ]; then
   eval "`fnm env`"
 fi
 
+# zoxide
+eval "$(zoxide init zsh)"
+
 # starship
 eval "$(starship init zsh)"
-
