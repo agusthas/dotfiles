@@ -21,6 +21,7 @@ fi
 
 source "$HOME/.config/zsh/aliases.zsh"
 source "$HOME/.config/zsh/profile.zsh"
+source "$HOME/.config/zsh/functions.zsh"
 # If you need to have a local .zsh_profile, create ~/.zsh_profile.local on your home directory
 [[ ! -f ~/.zsh_profile.local ]] || source ~/.zsh_profile.local
 
