@@ -50,8 +50,8 @@ base_install() {
 
   local brew_packages=(
     "${shared_packages[@]}"
+    "fd"
     "fnm"
-    "bfs"
     "starship"
     "zoxide"
   )
