@@ -32,6 +32,7 @@ function git_main_branch() {
 
 
 alias grt='cd "$(git rev-parse --show-toplevel || echo .)"'
+alias groot='cd "$(git rev-parse --show-toplevel || echo .)"'
 
 alias g="git"
 alias ga="git add"
