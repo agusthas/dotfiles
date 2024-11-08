@@ -16,10 +16,10 @@ if [ -d "$HOME/.config/zsh/plugins/fzf-git" ]; then
   source "$HOME/.config/zsh/plugins/fzf-git/fzf-git.sh"
   _fzf_git_fzf() {
     fzf-tmux -p 100%,100% \
+      --wrap \
       --layout=reverse --multi \
       --padding=1,0,0,0 \
-      --cycle --keep-right --border \
-      --border-label-pos=2 \
+      --border --border-label-pos=2 \
       --color='label:bold' \
       --preview-window='right,50%,border-left' \
       --bind='btab:up,double-click:ignore,tab:down' \
