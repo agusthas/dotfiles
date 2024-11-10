@@ -73,7 +73,6 @@ function grename() {
 }
 
 
-alias grt='cd "$(git rev-parse --show-toplevel || echo .)"'
 alias groot='cd "$(git rev-parse --show-toplevel || echo .)"'
 
 alias g="git"
@@ -104,8 +103,6 @@ alias gpsupf='git push --set-upstream origin $(git_current_branch) --force-with-
 alias gsw="git switch"
 alias gswc="git switch --create"
 alias gco="git checkout"
-alias gcd='git switch $(git_develop_branch)'
-alias gcm='git switch $(git_main_branch)'
 
 alias gwt='git worktree'
 alias gwta='git worktree add'
