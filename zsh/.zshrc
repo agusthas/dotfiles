@@ -38,6 +38,12 @@ source "$HOME/.config/zsh/functions.zsh"
 # If you need to have a local .zsh_profile, create ~/.zsh_profile.local on your home directory
 [[ ! -f ~/.zsh_profile.local ]] || source ~/.zsh_profile.local
 
+# go bin directory
+GO_BIN_PATH="$HOME/go/bin"
+if [ -d "$GO_BIN_PATH" ]; then
+  export PATH="$GO_BIN_PATH:$PATH"
+fi
+
 # fnm
 FNM_PATH="$HOME/.local/share/fnm"
 if [ -d "$FNM_PATH" ]; then
