@@ -38,6 +38,12 @@ source "$HOME/.config/zsh/functions.zsh"
 # If you need to have a local .zsh_profile, create ~/.zsh_profile.local on your home directory
 [[ ! -f ~/.zsh_profile.local ]] || source ~/.zsh_profile.local
 
+# go usr local directory (this is only in linux systems, on mac it's managed by homebrew)
+GO_INSTALL_PATH="/usr/local/go/bin"
+if [ -d "$GO_INSTALL_PATH" ]; then
+  export PATH="$GO_INSTALL_PATH:$PATH"
+fi
+
 # go bin directory
 GO_BIN_PATH="$HOME/go/bin"
 if [ -d "$GO_BIN_PATH" ]; then
@@ -45,10 +51,24 @@ if [ -d "$GO_BIN_PATH" ]; then
 fi
 
 # fnm
-FNM_PATH="$HOME/.local/share/fnm"
+export FNM_PATH="$HOME/.local/share/fnm"
 if [ -d "$FNM_PATH" ]; then
   export PATH="$HOME/.local/share/fnm:$PATH"
   eval "`fnm env`"
+fi
+
+# pnpm
+export PNPM_HOME="$HOME/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+
+# bun
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+export BUN_INSTALL="$HOME/.bun"
+if [ -d "$BUN_INSTALL" ]; then
+  export PATH="$BUN_INSTALL:$PATH"
 fi
 
 # zoxide
