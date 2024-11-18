@@ -1,7 +1,7 @@
 #!/bin/sh
 
 alias ll='ls -lh'
-alias la='ls -lAh'
+alias la='ls -A'
 
 # alias zsh-update-plugins="find "$HOME/.config/zsh/plugins" -type d -exec test -e '{}/.git' ';' -print0 | xargs -I {} -0 git -C {} pull -q"
 
