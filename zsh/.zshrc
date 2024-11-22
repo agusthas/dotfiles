@@ -11,6 +11,9 @@ export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND -exclude -name node_modules"
 # Clipboard
 [ -d "$HOME/.config/zsh/plugins/clipboard" ] && source "$HOME/.config/zsh/plugins/clipboard/clipboard.plugin.zsh"
 
+# History
+[ -d "$HOME/.config/zsh/plugins/history" ] && source "$HOME/.config/zsh/plugins/history/history.plugin.zsh"
+
 # FZF GIT
 if [ -d "$HOME/.config/zsh/plugins/fzf-git" ]; then
   source "$HOME/.config/zsh/plugins/fzf-git/fzf-git.sh"

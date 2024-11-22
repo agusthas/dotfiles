@@ -3,6 +3,9 @@
 alias ll='ls -lh'
 alias la='ls -A'
 
+alias md="mkdir -p"
+alias rd="rmdir"
+
 # alias zsh-update-plugins="find "$HOME/.config/zsh/plugins" -type d -exec test -e '{}/.git' ';' -print0 | xargs -I {} -0 git -C {} pull -q"
 
 alias grep='grep --color=auto'
