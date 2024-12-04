@@ -25,7 +25,7 @@ if [ -d "$HOME/.config/zsh/plugins/fzf-git" ]; then
       --border --border-label-pos=2 \
       --color='label:bold' \
       --preview-window='right,50%,border-left' \
-      --bind='btab:up,double-click:ignore,tab:down' \
+      --bind='double-click:ignore' \
       --bind='ctrl-/:change-preview-window(down,50%,border-top|hidden|)' "$@"
   }
 fi
