@@ -71,7 +71,7 @@ esac
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 export BUN_INSTALL="$HOME/.bun"
 if [ -d "$BUN_INSTALL" ]; then
-  export PATH="$BUN_INSTALL:$PATH"
+  export PATH="$BUN_INSTALL/bin:$PATH"
 fi
 
 # zoxide
