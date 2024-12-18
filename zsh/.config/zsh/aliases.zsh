@@ -14,5 +14,7 @@ alias fgrep='fgrep --color=auto'
 
 alias :q="exit"
 alias c="code"
+alias cr="code -r"
+alias cn="code -n"
 
 # alias getrandom='openssl rand -base64 32' 
