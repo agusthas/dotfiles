@@ -41,16 +41,15 @@ function fzf_setup_using_base_dir() {
   source "${fzf_shell}/key-bindings.zsh"
 }
 
-
-fzf_setup_using_base_dir \
-  || fzf_setup_error
-
 function fzf_setup_error() {
   cat >&2 <<'EOF'
 fzf plugin: Cannot find fzf installation directory.
 Please add `export FZF_BASE=/path/to/fzf/install/dir` to your .zshrc
 EOF
 }
+
+fzf_setup_using_base_dir \
+  || fzf_setup_error
 
 unset -f -m 'fzf_setup_*'
 
