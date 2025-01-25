@@ -20,7 +20,7 @@ defaults write -g ApplePressAndHoldEnabled -bool false
 ## Dock, Dashboard, and hot corners
 
 # Set the icon size of Dock items to 36 pixels
-defaults write com.apple.dock tilesize -int 40
+defaults write com.apple.dock "tilesize" -int 40
 
 # Speed up Mission Control animations
 defaults write com.apple.dock expose-animation-duration -float 0.15
@@ -29,4 +29,7 @@ defaults write com.apple.dock expose-animation-duration -float 0.15
 defaults write com.apple.dock autohide -bool true
 
 # Remove the auto-hiding Dock delay
-defaults write com.apple.dock autohide-delay -float 0
+defaults write com.apple.dock "autohide-delay" -float 0
+
+# Do not display recent applications in Dock
+defaults write com.apple.dock "show-recents" -bool "false"
