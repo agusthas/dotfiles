@@ -1,3 +1,3 @@
 [submodule "zsh/.config/zsh/plugins/fzf-git"]
 	path = zsh/.config/zsh/plugins/fzf-git
-	url = git@github.com:junegunn/fzf-git.sh.git
+	url = https://github.com/junegunn/fzf-git.sh.git
