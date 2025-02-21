@@ -1,168 +1,147 @@
 #!/usr/bin/env bash
 
+set -euo pipefail  # Enable strict mode: exit on error, treat unset variables as errors, and catch pipeline failures
+
+# Define colors for output
+COLOR_RESET="\e[0m"
+COLOR_INFO="\e[32m"  # Green
+COLOR_WARN="\e[33m"  # Yellow
+COLOR_ERROR="\e[31m"  # Red
+
+log_info() {
+  echo -e "\n${COLOR_INFO}[INFO] $1${COLOR_RESET}"
+}
+
+log_warn() {
+  echo -e "\n${COLOR_WARN}[WARNING] $1${COLOR_RESET}"
+}
+
+log_error() {
+  echo -e "\n${COLOR_ERROR}[ERROR] $1${COLOR_RESET}" >&2
+}
+
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 OS=$(uname -s)
-
-[ OS = "Linux" ] && echo "LINUX NOT SUPPORTED YET" && exit 1
 
 # Parse Flags
 parse_args() {
   while [[ $# -gt 0 ]]; do
-    key="$1"
-
-    case $key in
+    case "$1" in
       --skip-base)
-        skip_base="true"
-        shift # past argument
+        skip_base=true
+        log_info "Skipping base installation."
         ;;
       --skip-symlinks)
-        skip_symlinks="true"
-        shift # past argument
+        skip_symlinks=true
+        log_info "Skipping symlink creation."
         ;;
       --symlinks)
-        skip_base="true"
-        skip_extras="true"
-        shift # past argument
+        skip_base=true
+        skip_extras=true
+        log_info "Running in symlinks-only mode."
+        ;;
+      *)
+        log_error "Unknown option: $1"
+        exit 1
         ;;
     esac
+    shift
   done
 }
 
 base_install() {
-  local shared_packages=(
-    "zsh"
-    "tmux"
-    "git"
-    "stow"
-    "bfs"
-  )
+  log_info "Initializing base installation..."
+  
+  local shared_packages=("zsh" "tmux" "git" "stow" "bfs")
+  local apt_packages=("${shared_packages[@]}" "curl" "zip" "unzip" "fd-find" "bat" "gojq" "ripgrep")
+  local brew_packages=("${shared_packages[@]}" "fzf" "fd" "fnm" "starship" "zoxide")
 
-  local apt_packages=(
-    "${shared_packages[@]}"
-    "curl"
-    "zip"
-    "unzip"
-    "fd-find"
-    "bat"
-    "gojq"
-    "ripgrep"
-  )
-
-  local brew_packages=(
-    "${shared_packages[@]}"
-    "fzf"
-    "fd"
-    "fnm"
-    "starship"
-    "zoxide"
-  )
-
-  # Generate ASCII Text
-  if ! type base64 gunzip >/dev/null; then
-    echo "= INSTALL.SH ="
-  else
-    base64 -d <<<"H4sIAKGGEWMAA51NwRHAMAj6OwXP9uVCuWMRhy+YmAHqeUgECQCqQM9DOQPo7UWM2R1A6p2JSggp2inmKKvSDzZpyR06GyG5sMZnj07FNTc60g6HCkI7f5RlFHXCgWJ5tQXmw3fMbQn8rg8Stz4QJgEAAA==" | gunzip
-  fi
-  printf "\n"
-
-  case "$(uname -s)" in
+  case "$OS" in
   'Linux')
-    echo "======= LINUX ======="
-    echo "Escalated permission are required to install base packages"
+    log_info "Detected Linux."
     if ! sudo -v; then
+      log_error "Failed to obtain sudo permissions. Exiting..."
       exit 1
     fi
-    printf "\n"
 
-    echo "PRE COMMANDS"
-    # git
-    sudo add-apt-repository --no-update -y ppa:git-core/ppa
+    if [[ ! -f "$HOME/.dotfiles-base-installed" ]]; then
+      log_info "Adding required repositories..."
+      sudo add-apt-repository --no-update -y ppa:git-core/ppa
 
-    # Installing base dependencies
-    echo && echo "Installing dependencies..."
-    sudo apt-get update && sudo apt-get upgrade -y # Update and upgrade packages
-    sudo apt-get install -y "${apt_packages[@]}"
+      log_info "Updating and upgrading system packages..."
+      sudo apt-get update && sudo apt-get upgrade -y
 
-    # post-commands for several packages
-    echo && echo "POST COMMANDS"
-    mkdir -p ~/bin ~/work ~/sandbox
+      log_info "Installing dependencies..."
+      sudo apt-get install -y "${apt_packages[@]}"
 
-    if ! echo "$SHELL" | grep -q "zsh"; then
-      echo "Please manually change shell to zsh."
-      echo "You can do this by running:"
+      log_info "Setting up directories..."
+      mkdir -pv ~/bin ~/work ~/sandbox
+
+      touch $HOME/.dotfiles-base-installed
+    fi
+
+    if [[ "$SHELL" != *"zsh"* ]]; then
+      log_warn "Default shell is not zsh. Change it using the following command:"
       echo "  chsh -s \$(which zsh)"
       exit 1
-    else
-      # bat
-      echo "[INFO] Creating batcat alias..."
-      ln -s $(which batcat) ~/bin/bat
-
-      # fd
-      echo "[INFO] Creating fdfind alias..."
-      ln -s $(which fdfind) ~/bin/fd
-
-      # fzf
-      if ! type fzf >/dev/null; then
-        echo "[INFO] Installing fzf..."
-        # installing fzf using git
-        git clone --depth=1 https://github.com/junegunn/fzf.git "${HOME}/.fzf"
-        "${HOME}/.fzf/install" --key-bindings --completion --no-update-rc
-      fi
-      
-      # zoxide (needs FZF)
-      if ! type zoxide >/dev/null; then
-        echo "[INFO] Installing zoxide..."
-        curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
-      fi
-
-      # fnm
-      FNM_PATH="$HOME/.local/share/fnm"
-      if [ -d "$FNM_PATH" ]; then
-        echo "[INFO] Installing fnm..."
-        curl -fsSL https://fnm.vercel.app/install | bash -s -- --install-dir "$HOME/.local/share/fnm" --skip-shell
-      fi
-
-      # starship
-      echo "[INFO] Installing starship..."
-      curl -sS https://starship.rs/install.sh | sh
     fi
+
+    log_info "Creating aliases..."
+    ln -sf $(command -v batcat) ~/bin/bat || true
+    ln -sf $(command -v fdfind) ~/bin/fd || true
+
+    if ! command -v fzf &>/dev/null; then
+      log_info "Installing fzf..."
+      git clone --depth=1 https://github.com/junegunn/fzf.git "${HOME}/.fzf"
+      "${HOME}/.fzf/install" --key-bindings --completion --no-update-rc
+    fi
+    
+    if ! command -v zoxide &>/dev/null; then
+      log_info "Installing zoxide..."
+      curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+    fi
+
+    local FNM_PATH="$HOME/.local/share/fnm"
+    if [[ ! -d "$FNM_PATH" ]]; then
+      log_info "Installing fnm..."
+      curl -fsSL https://fnm.vercel.app/install | bash -s -- --install-dir "$HOME/.local/share/fnm" --skip-shell
+    fi
+
+    log_info "Installing Starship prompt..."
+    curl -sS https://starship.rs/install.sh | sh
     ;;
   'Darwin')
-    echo "======= MAC ======="
+    log_info "Detected MacOS. Installing base packages..."
     brew install "${brew_packages[@]}"
     ;;
   *)
-    echo "Unsupported OS"
+    log_error "Unsupported OS: $OS. Exiting..."
     exit 1
     ;;
   esac
 }
 
 create_symlinks() {
-  echo "Creating symlinks"
-
-  # Stow --no-folding means that it will not create parent directories
+  log_info "Starting symlink creation..."
   local cmd="stow -d $SCRIPT_DIR -t $HOME --no-folding --verbose=1"
-
   mkdir -p "$HOME/bin" "$HOME/.config"
 
-  $cmd \
-    zsh \
-    git \
-    tmux \
-    vim \
-    starship \
-    scripts
+  log_info "Applying dotfiles configuration..."
+  $cmd zsh git tmux vim starship scripts
   
-  if [ "$OS" = "Linux" ]; then
+  if [[ "$OS" == "Linux" ]]; then
+    log_info "Applying Linux-specific configurations..."
     $cmd ubuntu 
-  elif [ "$OS" = "Darwin" ]; then
+  elif [[ "$OS" == "Darwin" ]]; then
+    log_info "Applying MacOS-specific configurations..."
     $cmd macos
   fi
 }
 
 parse_args "$@"
-[ "$skip_base" != "true" ] && base_install
-[ "$skip_symlinks" != "true" ] && create_symlinks
 
-echo "[install.sh] Done!"
+[[ -z "${skip_base:-}" ]] && base_install
+[[ -z "${skip_symlinks:-}" ]] && create_symlinks
+
+log_info "Installation process completed successfully!"
+
