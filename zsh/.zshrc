@@ -37,6 +37,9 @@ if command -v vim >/dev/null 2>&1; then
   export EDITOR='vim'
 fi 
 
+# Environment variables
+[[ ! -f $HOME/.config/zsh/env.zsh ]] || source $HOME/.config/zsh/env.zsh
+
 source "$HOME/.config/zsh/aliases.zsh"
 source "$HOME/.config/zsh/profile.zsh"
 source "$HOME/.config/zsh/functions.zsh"
