@@ -1,3 +1,5 @@
+# Add a file to export all environment variables if the file is defined.
+
 # Supercharge (zsh setup and etc)
 [ -d "$HOME/.config/zsh/plugins/supercharge" ] && source "$HOME/.config/zsh/plugins/supercharge/supercharge.plugin.zsh"
 

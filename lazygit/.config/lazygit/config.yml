@@ -1,0 +1,7 @@
+gui:
+  theme:
+    selectedLineBgColor:
+      - reverse
+
+os:
+  editPreset: 'vscode'

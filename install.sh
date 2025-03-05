@@ -127,7 +127,7 @@ create_symlinks() {
   mkdir -p "$HOME/bin" "$HOME/.config"
 
   log_info "Applying dotfiles configuration..."
-  $cmd zsh git tmux vim starship scripts
+  $cmd zsh git tmux vim starship scripts lazygit
   
   if [[ "$OS" == "Linux" ]]; then
     log_info "Applying Linux-specific configurations..."
