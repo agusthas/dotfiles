@@ -2,52 +2,36 @@
 
 command -v fzf >/dev/null 2>&1 || { echo "fzf is not installed"; exit 1; }
 
-SEARCH_DIRS=("$HOME/work" "$HOME/sandbox")
+SEARCH_DIRS=("$HOME" "$HOME/work" "$HOME/sandbox")
 
 list_directories() {
   if command -v bfs >/dev/null 2>&1; then
-    bfs "${SEARCH_DIRS[@]}" -maxdepth 1 -type d -nohidden
-  elif command -v fd >/dev/null 2>&1; then
-    fd . "${SEARCH_DIRS[@]}" --max-depth 1 --type d
+    bfs "${SEARCH_DIRS[@]}" -maxdepth 1 -mindepth 1 -type d
   else
-    find "${SEARCH_DIRS[@]}" -maxdepth 1 -type d -not -path '*/.*'
+    find "${SEARCH_DIRS[@]}" -maxdepth 1 -mindepth 1 -type d
   fi
 }
 
-dir_list=$(list_directories)
-
-# list directories from zoxide and append to the list
-if command -v zoxide >/dev/null 2>&1; then
-  dir_list+=$'\n'"$(zoxide query --list)"
+if [[ $# -eq 1 ]]; then
+  selected=$1
+else
+  selected=$(list_directories | fzf)
 fi
 
-# sort the list alphabetically and unique
-dir_list=$(echo -e "$dir_list" | sort | uniq)
-
-selected=$(
-  echo "$dir_list" | fzf-tmux -p80%,50% -- \
-  --height=40% --min-height=20 --border \
-  --border-label="tmux-sessionizer"  --reverse \
-  --query "$1" --exit-0
-)
-
-[[ -z $selected ]] && exit 0
-
-# Create a session name from the basename of the selected directory
-tmux_session_name=$(basename $selected | tr '.' '_')
-tmux_running=$(pgrep tmux)
-
-if [[ -z $TMUX && -z "$(pgrep tmux)" ]]; then
-  tmux new-session -s "$tmux_session_name" -c "$selected"
+if [[ -z $selected ]]; then
   exit 0
 fi
 
-if ! tmux has-session -t "$tmux_session_name" 2> /dev/null; then
-  tmux new-session -ds "$tmux_session_name" -c "$selected"
+selected_name=$(basename "$selected" | tr . _)
+tmux_running=$(pgrep tmux)
+
+if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
+  tmux new-session -s $selected_name -c $selected
+  exit 0
 fi
 
-if [[ -z $TMUX ]]; then
-  tmux attach-session -t "$tmux_session_name"
-else
-  tmux switch-client -t "$tmux_session_name"
+if ! tmux has-session -t=$selected_name 2> /dev/null; then
+  tmux new-session -ds $selected_name -c $selected
 fi
+
+tmux switch-client -t $selected_name
