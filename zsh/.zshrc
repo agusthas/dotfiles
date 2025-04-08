@@ -56,5 +56,7 @@ fi
 # zoxide
 eval "$(zoxide init zsh)"
 
-# starship
-eval "$(starship init zsh)"
+# starship only on non macOS
+if [[ "$OSTYPE" != "darwin"* ]]; then
+  eval "$(starship init zsh)"
+fi
